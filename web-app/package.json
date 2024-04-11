@@ -14,8 +14,5 @@
 		"svelte": "^4.2.7",
 		"vite": "^5.0.3"
 	},
-	"type": "module",
-	"dependencies": {
-		"node-calls-python": "^1.8.4"
-	}
+	"type": "module"
 }

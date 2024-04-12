@@ -1,18 +1,11 @@
 <script>
-   let a = 0;
+	import { exampleServerFunc } from "$lib/core/api"
+   	let a = 0;
 	let b = 0;
 	let total = 0;
 
 	async function add() {
-		const response = await fetch('/api', {
-			method: 'POST',
-			body: JSON.stringify({ a, b }),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-
-		total = await response.json();
+		total = await exampleServerFunc(a, b);
 	}
 </script>
 

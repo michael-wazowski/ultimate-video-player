@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="/static/script.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+
+<body>
+    <div>
+        <h1>Ultimate Video Player</h1>
+        <input type="text" value="Search">
+    </div>
+
+    <div>
+        <h1>Upload new File</h1>
+        <form method=post enctype=multipart/form-data>
+            <input type=file name=file>
+            <input type=submit value=Upload>
+        </form>
+    </div>
+
+    <div>
+        <h1>
+            List of files on server
+        </h1>
+        <div id = "video-list">
+
+        </div>
+    </div>
+</body>
+
+</html>

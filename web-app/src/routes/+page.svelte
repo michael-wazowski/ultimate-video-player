@@ -3,7 +3,7 @@
    	let a = 0;
 	let b = 0;
 	let total = 0;
-
+ 
 	async function add() {
 		total = await exampleServerFunc(a, b);
 	}

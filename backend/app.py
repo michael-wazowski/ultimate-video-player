@@ -1,12 +1,15 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, flash, request, redirect, url_for, jsonify, send_from_directory, after_this_request
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = """C:\\Users\\JaydenL\\Documents\\Uni\\COMPX241\\241-project\\ultimate-video-player\\static\\video"""
+UPLOAD_FOLDER = "../static/video"
 ALLOWED_EXTENSIONS = {'mp4','avi'}
 
-app = Flask(__name__)
+
+app = Flask(__name__, static_folder='static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+CORS(app)
 
 #Stuff for the database
 import sqlite3
@@ -71,7 +74,8 @@ def root():
                 #return redirect(url_for('download_file', name=filename))
                 return redirect(url_for('upload_complete'))
 
-    return app.send_static_file('index.html')
+    #return app.send_static_file('index.html')
+    return "Kellefef"
 
 #serve the /static directory
 @app.route('/<path:path>')
@@ -97,6 +101,20 @@ def download_file(id):
     else:
         return "not found", 404    
 
+#Serve video as url
+@app.route('/uploads/url/<id>')
+def server_url(id):
+    sqliteConnection = sqlite3.connect('sql.db')
+    cursor = sqliteConnection.cursor()
+    cursor.execute('SELECT filename FROM files WHERE id = ?', (id))
+    result = cursor.fetchone()
+
+    if(result):
+        filename = result[0]
+        return url_for('static', filename=("video/"+id+filename))
+    else:
+        return "not found", 404    
+
 #serve list of videos for the index page
 @app.route('/list')
 def json_list_of_videos():
@@ -117,6 +135,9 @@ def json_list_of_videos():
         }
         entry_list.append(entry_dict)
 
-    return jsonify(entry_list)
+    return entry_list
 
 #part to serve json of given timestamps from the database for given file
+if(__name__ == "__main__"):
+    app.debug = true
+    app.run()

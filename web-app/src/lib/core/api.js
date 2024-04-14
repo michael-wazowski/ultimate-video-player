@@ -21,6 +21,7 @@ export async function exampleServerFunc(a = 0 , b = 0) {
     }
 }
 
+// Request the list of videos and their information in the database
 export async function getVideos()  {
     try{
         let response = await fetch('http://127.0.0.1:8000/list', {
@@ -42,6 +43,7 @@ export async function getVideos()  {
     }
 }
 
+// Gets the filename of a video in the database, filenames contain the id and the original name of the video for now
 export async function getVideoFileUrl(id = 0){
     try{
         let response = await fetch(`http://127.0.0.1:8000/uploads/url/${id}`, {

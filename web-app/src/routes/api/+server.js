@@ -8,5 +8,3 @@ import { json, fail } from '@sveltejs/kit';
   const { a, b } = await request.json();
   return json(a + b);
 }
-
-// Query backend

@@ -13,30 +13,39 @@
    	let a = 0;
 	let b = 0;
 	let total = 0;
+
+	// Used to start preloading the list of videos the user has
 	let promise = queryVideos();
+	
 	let dynamicVideo = null;
 
 	let currentFile;
 	let uploadForm;
 	const videoShowing = writable(false);
 
+	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
 	$: if(currentFile){
 		videoShowing.set(true);
 	}
 
+	// Example function that calls to the server side
 	async function add() {
 		total = await exampleServerFunc(a, b);
 	}
 
+	// Querys the python server from the client side, returns the list of videos the client has
 	async function queryVideos() {
 		return await getVideos();
 	}
 
+	// Callback that takes a videos id, gets the filename and then changes the video player source to the url for the video
 	async function onSelectVideo(id = 0){
+		// gets the static sub url of the video
 		let response = await getVideoFileUrl(id);
 		if(response != null){
+			// Video urls are currently static and just a combination of the video id and its filename
 			let absoluteUrl = "http://127.0.0.1:8000" + response;
-			console.log(absoluteUrl);
+
 			dynamicVideo = absoluteUrl;
 			videoShowing.set(true);
 		}

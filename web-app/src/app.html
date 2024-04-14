@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background-color: #262626;">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
@@ -10,3 +10,21 @@
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>
+
+<style>
+	html::-webkit-scrollbar, div::-webkit-scrollbar{
+        width: 12px;
+    }
+        
+    html::-webkit-scrollbar-track, div::-webkit-scrollbar {
+		border-radius: 8px;
+		background-color: #363636;
+		border: 1px solid #363636;
+		box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+       }
+        
+    html::-webkit-scrollbar-thumb, div::-webkit-scrollbar {
+		border-radius: 8px;
+		background-color: #0f62fe;
+    }
+</style>

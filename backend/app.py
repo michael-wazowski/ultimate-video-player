@@ -74,8 +74,8 @@ def root():
                 #return redirect(url_for('download_file', name=filename))
                 return redirect(url_for('upload_complete'))
 
-    #return app.send_static_file('index.html')
-    return "Kellefef"
+    return app.send_static_file('index.html')
+    #return "Kellefef"
 
 #serve the /static directory
 @app.route('/<path:path>')

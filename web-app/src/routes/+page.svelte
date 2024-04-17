@@ -93,7 +93,7 @@
 						<img src="{PlusSymbol}" alt="upload file here" style="width: 100px; height: auto; grid-row: 2; grid-column: 2; margin: auto; background-color: transparent;"/>
 					</Grid>
 					<input bind:files={currentFile} type="file" name="videoSelector" accept=".mp4" class="file-area" id="file-upload"/>
-					<input type="submit">
+					<input type="submit" style="display: none;">
 				</label>
 			</form>
 		</Border>

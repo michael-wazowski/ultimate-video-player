@@ -54,7 +54,7 @@
 	}
 </script>
 
-<div>
+<div style="width: 80%; margin: 0 auto;">
 	<video
 		poster={thumbNailSource}
 		src={fileSource}

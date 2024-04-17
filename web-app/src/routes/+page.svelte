@@ -7,7 +7,7 @@
 	import Grid from "../lib/components/Grid.svelte";
 	import Border from "../lib/components/Border.svelte";
 	import VideoThumbnail from '../lib/components/VideoThumbnail.svelte';
-	import Video from "$lib/assets/playedvideo.mp4"
+
 	import PlusSymbol from "$lib/assets/plus-symbol.svg"
 
    	let a = 0;
@@ -17,15 +17,20 @@
 	// Used to start preloading the list of videos the user has
 	let promise = queryVideos();
 	
+	let form;
 	let dynamicVideo = null;
 
 	let currentFile;
-	let uploadForm;
 	const videoShowing = writable(false);
 
 	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
 	$: if(currentFile){
-		videoShowing.set(true);
+		form.requestSubmit();
+		if(dynamicVideo != null){
+			videoShowing.set(true);
+		}
+		
+		//form.requestSubmit();
 	}
 
 	// Example function that calls to the server side
@@ -50,6 +55,23 @@
 			videoShowing.set(true);
 		}
 	}
+
+	async function handleVideoUpload(event){
+		var formData = new FormData();
+		formData.append("file", currentFile.item(0));
+
+		let response = await fetch("http://127.0.0.1:8000/", {
+      		method: "POST",
+      		body: formData,
+			redirect: 'follow'
+   		});
+
+		let subUrl = await response.text();
+		let absoluteUrl = "http://127.0.0.1:8000" + subUrl;
+
+		dynamicVideo = absoluteUrl;
+		videoShowing.set(true);
+	}
 </script>
 
 
@@ -57,25 +79,26 @@
 	Ultimate Video Player
 </h1>
 {#if $videoShowing === true }
-	<svelte:component this="{VideoPlayer}" fileSource="{dynamicVideo === null ? Video : dynamicVideo}" thumbNailSource="https://sveltejs.github.io/assets/caminandes-llamigos.jpg"/>
+	<svelte:component this="{VideoPlayer}" fileSource="{dynamicVideo}" thumbNailSource="https://sveltejs.github.io/assets/caminandes-llamigos.jpg"/>
 {:else}
 	<Grid rows="4rem 20rem 4rem 1fr" columns="10% 80% 10%">
 		<h3 style="grid-column: 2;">Please select a video file to play it back!</h3>
 
 		<Border height="100%" width="100%" style="grid-column: 2;">
-			<form method="post" enctype="multipart/form-data" bind:this={uploadForm} style="height: 100%; width: 100%;">
+			<form method="post" enctype="multipart/form-data" style="height: 100%; width: 100%;" on:submit|preventDefault={handleVideoUpload} bind:this={form}>
 				<label for="file-upload" class="custom-file-area">
 					<Grid columns="1fr 1fr 1fr" rows="1fr 1fr 1fr">
 						<img src="{PlusSymbol}" alt="upload file here" style="width: 100px; height: auto; grid-row: 2; grid-column: 2; margin: auto; background-color: transparent;"/>
 					</Grid>
-					<input bind:value={currentFile} type="file" name="videoSelector" accept=".mp4" class="file-area" id="file-upload"/>
+					<input bind:files={currentFile} type="file" name="videoSelector" accept=".mp4" class="file-area" id="file-upload"/>
+					<input type="submit">
 				</label>
 			</form>
 		</Border>
 
 		<h3 style="grid-column: 2;"> Or select an existing video to watch it again!</h3>
 
-		<Border height="100%" width="100%" corner="15px" style="grid-column: 2; overflow-y: scroll; overflow-x: hidden;">
+		<Border height="100%" width="100%" corner="15px" style="grid-column: 2; overflow-y: scroll; overflow-x: hidden; height: 600px">
 			{#await promise}
 				<h2> Loading vids</h2>
 			{:then videos}

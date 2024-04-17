@@ -3,12 +3,13 @@ from flask import Flask, flash, request, redirect, url_for, jsonify, send_from_d
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = "../static/video"
-ALLOWED_EXTENSIONS = {'mp4','avi'}
+UPLOAD_FOLDER = "static/video"
+ALLOWED_EXTENSIONS = {'mp4','avi', 'webm'}
 
 
 app = Flask(__name__, static_folder='static')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = os.path.abspath(UPLOAD_FOLDER)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 CORS(app)
 
 #Stuff for the database
@@ -69,10 +70,12 @@ def root():
                 file_info = (filename, False, None)
                 cursor.execute('INSERT INTO files (filename, processed, processed_data) VALUES (?, ?, ?)', file_info)
                 sqliteConnection.commit()
-
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], str(cursor.lastrowid)+filename))
+                
+                newName = str(cursor.lastrowid)+filename
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], newName))
                 #return redirect(url_for('download_file', name=filename))
-                return redirect(url_for('upload_complete'))
+                #return redirect(url_for('upload_complete'))
+                return redirect(url_for('server_url', id=str(cursor.lastrowid)))
 
     return app.send_static_file('index.html')
     #return "Kellefef"
@@ -92,7 +95,9 @@ def serve_player_page():
 def download_file(id):
     sqliteConnection = sqlite3.connect('sql.db')
     cursor = sqliteConnection.cursor()
-    cursor.execute('SELECT filename FROM files WHERE id = ?', (id))
+    # https://stackoverflow.com/questions/16856647/sqlite3-programmingerror-incorrect-number-of-bindings-supplied-the-current-sta
+    # id input MUST be cast to tuple otherwise sql treats each digit as a seperate binding
+    cursor.execute('SELECT filename FROM files WHERE id = ?', [id])
     result = cursor.fetchone()
 
     if result:
@@ -106,12 +111,13 @@ def download_file(id):
 def server_url(id):
     sqliteConnection = sqlite3.connect('sql.db')
     cursor = sqliteConnection.cursor()
-    cursor.execute('SELECT filename FROM files WHERE id = ?', (id))
+    print(id)
+    cursor.execute('SELECT filename FROM files WHERE id = ?', [id])
     result = cursor.fetchone()
 
     if(result):
         filename = result[0]
-        return url_for('static', filename=("video/"+id+filename))
+        return url_for('static', filename=("video/"+str(id)+filename))
     else:
         return "not found", 404    
 

@@ -8,8 +8,8 @@
     export let clickBinding;
 </script>
 
-<button on:click={clickBinding} style="flex: 1 1 0px ; align-self: flex-start; overflow-x: wrap;">
-    <Grid rows="1fr 3rem">
+<button on:click={clickBinding} style="flex: 0 1 300px ; align-self: flex-start; overflow-x: wrap; overflow-y: hidden;">
+    <Grid rows="1fr auto">
         <div style="width: 100%; height: 100%">
             <p>{length}</p>
             <img src={thumbNailUrl} alt="thumbnail">
@@ -27,7 +27,7 @@
         background-color: #393939;
         border-color: transparent;
         border-radius: 15px;
-        margin: 10px;
+        margin: 10px 5px 0px 5px;
     }
 
     div {
@@ -35,9 +35,9 @@
     }
 
     img {
-        margin: 15px 15px 15px 15px;
+        margin: 15px 15px 0px 15px;
         width: calc(100% - 32px);
-        height: calc(100% - 32px);
+        height: calc(100% - 15px);
         border-radius: 15px;
     }
 
@@ -52,7 +52,11 @@
     }
 
     h3 {
+        margin: 8px 15px 0px 15px;
         color: #f4f4f4;
+        overflow-wrap: break-word;
+        min-width: 0;
+        text-align: start;
     }
 
     button div, button h3 {

@@ -19,12 +19,13 @@
 	
 	let form;
 	let dynamicVideo = null;
+	let blockUpload = false;
 
 	let currentFile;
 	const videoShowing = writable(false);
 
 	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
-	$: if(currentFile){
+	$: if(currentFile && blockUpload == false){
 		form.requestSubmit();
 		if(dynamicVideo != null){
 			videoShowing.set(true);
@@ -57,6 +58,7 @@
 	}
 
 	async function handleVideoUpload(event){
+		blockUpload = true;
 		var formData = new FormData();
 		formData.append("file", currentFile.item(0));
 

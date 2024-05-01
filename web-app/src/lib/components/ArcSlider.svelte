@@ -114,6 +114,7 @@
 	}
 
 	.container {
+		padding-top: 200px;
 		width: 100%;
 		height: 100%;
 	}

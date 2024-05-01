@@ -1,6 +1,8 @@
 <script>
     //import { Border, Grid } from "$lib/components"
 
+	import ArcSlider from "./ArcSlider.svelte";
+
 	// These values are bound to properties of the video
 	let time = 0;
 	let duration;
@@ -78,6 +80,7 @@
 			<span class="time">{format(duration)}</span>
 		</div>
 	</div>
+	<svelte:component this="{ArcSlider}"></svelte:component>
 </div>
 
 <style>

@@ -12,3 +12,8 @@ Team Members:
 - Shreyaa Senthil Kumar
 - Jack Unsworth
 - Leo Van Der Merwe
+
+## How to run this weird stack
+<code>cd web-app & npm install & npm run dev</code>
+
+<code>cd backend && flask run --port 8000</code>

@@ -2,7 +2,7 @@
 	import { writable, get } from 'svelte/store';
 	import { Guid } from "js-guid";
 	
-	import { exampleServerFunc, getVideos, getVideoFileUrl } from "$lib/core/api";
+	import { getVideos, getVideoFileUrl } from "$lib/core/api";
     import VideoPlayer from "../lib/components/VideoPlayer.svelte";
 	import Grid from "../lib/components/Grid.svelte";
 	import Border from "../lib/components/Border.svelte";
@@ -32,11 +32,6 @@
 		}
 		
 		//form.requestSubmit();
-	}
-
-	// Example function that calls to the server side
-	async function add() {
-		total = await exampleServerFunc(a, b);
 	}
 
 	// Querys the python server from the client side, returns the list of videos the client has

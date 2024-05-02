@@ -80,7 +80,7 @@
 			<span class="time">{format(duration)}</span>
 		</div>
 	</div>
-	<svelte:component this="{ArcSlider}"></svelte:component>
+	<ArcSlider/>
 </div>
 
 <style>

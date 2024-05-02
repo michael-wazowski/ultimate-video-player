@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Test",
+            "database": "${workspaceFolder:ultimate-video-player}/backend/sql.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

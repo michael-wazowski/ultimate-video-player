@@ -8,11 +8,7 @@
 	import Border from "../lib/components/Border.svelte";
 	import VideoThumbnail from '../lib/components/VideoThumbnail.svelte';
 
-	import PlusSymbol from "$lib/assets/plus-symbol.svg"
-
-   	let a = 0;
-	let b = 0;
-	let total = 0;
+	import PlusSymbol from "$lib/assets/plus-symbol.svg";
 
 	// Used to start preloading the list of videos the user has
 	let promise = queryVideos();
@@ -73,7 +69,7 @@
 
 
 <h1>
-	Ultimate Video Player
+	<a on:click={()=>videoShowing.set(false)} href="/">Ultimate Video Player</a>
 </h1>
 {#if $videoShowing === true }
 	<svelte:component this="{VideoPlayer}" fileSource="{dynamicVideo}" thumbNailSource="https://sveltejs.github.io/assets/caminandes-llamigos.jpg"/>
@@ -169,6 +165,10 @@
 
 	.uploaded-list-item:hover{
 		background-color: #606060;
+	}
+
+	h1 > a{
+		text-decoration: none;
 	}
 
 

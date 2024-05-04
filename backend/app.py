@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 import threading
 import json
 import sqlite3
+import imageio.v3 as ffmpeg
 
 # Import our processing functions
 import OCRFunction
@@ -51,6 +52,21 @@ sqliteConnection.close()
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def autogenerate_thumbnail(video_id):
+    sqliteConnection = sqlite3.connect("sql.db")
+    cursor = sqliteConnection.cursor()
+    cursor.execute("SELECT filename FROM files WHERE id = ?", [video_id])
+    result = cursor.fetchone()
+
+    if result:
+        filename = os.path.join(app.config["UPLOAD_FOLDER"], str(video_id)+ result[0])
+        for frame_count, first_frame in enumerate(ffmpeg.imiter(filename)):
+            ffmpeg.imwrite(f"{os.path.join(app.config["UPLOAD_FOLDER"], "../thumbnail/", str(video_id))}.jpg", first_frame)
+            break
+        
+
+
+
 #handle file upload (and also host barebones test page)
 @app.route("/", methods=["GET", "POST"])
 def root():
@@ -79,8 +95,8 @@ def root():
 
             newName = str(cursor.lastrowid) + filename
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], newName))
+            autogenerate_thumbnail(cursor.lastrowid)
 
-            #
             if thread_event.is_set() == False:
                 try:
                     thread_event.set()
@@ -160,7 +176,6 @@ def server_url(id):
     else:
         return "not found", 404
 
-
 # serve list of videos for the index page
 @app.route("/list")
 def json_list_of_videos():
@@ -185,7 +200,7 @@ thread_event = threading.Event()
 
 
 def backgroundTask():
-    while True():
+    while (True):
         # find all entries in db not processed
         # process them
 

@@ -19,6 +19,7 @@
 
 	let currentFile;
 	const videoShowing = writable(false);
+	const BACKEND_URL = "http://127.0.0.1:8000";
 
 	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
 	$: if(currentFile && blockUpload == false){
@@ -41,7 +42,7 @@
 		let response = await getVideoFileUrl(id);
 		if(response != null){
 			// Video urls are currently static and just a combination of the video id and its filename
-			let absoluteUrl = "http://127.0.0.1:8000" + response;
+			let absoluteUrl = BACKEND_URL + response;
 
 			dynamicVideo = absoluteUrl;
 			videoShowing.set(true);
@@ -53,14 +54,14 @@
 		var formData = new FormData();
 		formData.append("file", currentFile.item(0));
 
-		let response = await fetch("http://127.0.0.1:8000/", {
+		let response = await fetch(BACKEND_URL + "/", {
       		method: "POST",
       		body: formData,
 			redirect: 'follow'
    		});
 
 		let subUrl = await response.text();
-		let absoluteUrl = "http://127.0.0.1:8000" + subUrl;
+		let absoluteUrl = BACKEND_URL + subUrl;
 
 		dynamicVideo = absoluteUrl;
 		videoShowing.set(true);
@@ -97,7 +98,7 @@
 			{:then videos}
 				<div class="uploaded-list-container" style="display: flex; flex-wrap: wrap;">
 					{#each videos as { filename, id }, i}
-						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="https://picsum.photos/600/300" title={filename} length=12.2 />
+						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="{BACKEND_URL}/static/thumbnail/{id}.jpg" title={filename} length=12.2 />
 					{/each}
 				</div>
 			{/await}

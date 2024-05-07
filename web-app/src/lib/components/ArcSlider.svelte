@@ -61,9 +61,11 @@
 		//coords.x = 0;
 		//coords.y = getElipsicalY()*-1;
 	}
+
+	const visibleSliderEvents = [{content: "Text"},{content: "Text2"}]; //load these from the captions
 </script>
 
-<div class="container" bind:offsetWidth={containerWidth}>
+<!-- <div class="container" bind:offsetWidth={containerWidth}>
 <div class = "elipse-path" style="--elipse-width: {maxRadius*2}px; --elipse-height: {maxHeight*2}px; border-color:{trackColor};">
 </div>
 
@@ -76,8 +78,28 @@
 	style="transform:
 		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
 />
-</div>
+</div> -->
 
+<div class="container" bind:offsetWidth={containerWidth}>
+	<div 
+	use:pannable
+	on:panstart={handlePanStart}
+	on:panmove={handlePanMove}
+	on:panend={handlePanEnd}
+	class = "elipse-path" id = "elipsePath" style="--elipse-width: {maxRadius*2}px; --elipse-height: {maxHeight*2}px; border-color:{trackColor};">
+	</div>
+	
+<div
+	class="box"
+
+	style="transform:
+		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
+/>
+	{#each visibleSliderEvents as chip}
+		<div class="box" style="transform:
+		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;">{chip.content}</div>
+	{/each}
+</div>
 	
 <style>
 	* {
@@ -111,6 +133,9 @@
 		left: calc(50% - var(--elipse-width)/2);
 		top: calc(50% - var(--elipse-height)/2 - var(--track-width)/2);
 		clip-path: inset(0px 0px 50%);
+
+		/* width: 100%;
+		aspect-ratio: 1 / 1; */
 	}
 
 	.container {

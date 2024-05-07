@@ -2,7 +2,7 @@
 	import { writable, get } from 'svelte/store';
 	import { Guid } from "js-guid";
 	
-	import { getVideos, getVideoFileUrl } from "$lib/core/api";
+	import { getVideos } from "$lib/core/api";
     import VideoPlayer from "../lib/components/VideoPlayer.svelte";
 	import Grid from "../lib/components/Grid.svelte";
 	import Border from "../lib/components/Border.svelte";
@@ -39,14 +39,14 @@
 	// Callback that takes a videos id, gets the filename and then changes the video player source to the url for the video
 	async function onSelectVideo(id = 0){
 		// gets the static sub url of the video
-		let response = await getVideoFileUrl(id);
-		if(response != null){
+		//let response = await getVideoFileUrl(id);
+		//if(response != null){
 			// Video urls are currently static and just a combination of the video id and its filename
-			let absoluteUrl = BACKEND_URL + response;
+		let absoluteUrl = BACKEND_URL + "/uploads/"+id;
 
-			dynamicVideo = absoluteUrl;
-			videoShowing.set(true);
-		}
+		dynamicVideo = absoluteUrl;
+		videoShowing.set(true);
+		//}
 	}
 
 	async function handleVideoUpload(event){
@@ -73,7 +73,7 @@
 	<a on:click={()=>videoShowing.set(false)} href="/">Ultimate Video Player</a>
 </h1>
 {#if $videoShowing === true }
-	<svelte:component this="{VideoPlayer}" fileSource="{dynamicVideo}" thumbNailSource="https://sveltejs.github.io/assets/caminandes-llamigos.jpg"/>
+	<svelte:component this="{VideoPlayer}" fileSource={dynamicVideo}/>
 {:else}
 	<Grid rows="4rem 20rem 4rem 1fr" columns="10% 80% 10%">
 		<h3 style="grid-column: 2;">Please select a video file to play it back!</h3>
@@ -98,7 +98,7 @@
 			{:then videos}
 				<div class="uploaded-list-container" style="display: flex; flex-wrap: wrap;">
 					{#each videos as { filename, id }, i}
-						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="{BACKEND_URL}/static/thumbnail/{id}.jpg" title={filename} length=12.2 />
+						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} length=12.2 />
 					{/each}
 				</div>
 			{/await}

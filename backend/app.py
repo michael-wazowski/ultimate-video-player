@@ -61,7 +61,7 @@ def autogenerate_thumbnail(video_id):
     if result:
         filename = os.path.join(app.config["UPLOAD_FOLDER"], str(video_id)+ result[0])
         for frame_count, first_frame in enumerate(ffmpeg.imiter(filename)):
-            ffmpeg.imwrite(f"{os.path.join(app.config["UPLOAD_FOLDER"], "../thumbnail/", str(video_id))}.jpg", first_frame)
+            ffmpeg.imwrite(os.path.join(app.config["UPLOAD_FOLDER"], str(video_id))+".jpg", first_frame)
             break
         
 
@@ -107,7 +107,8 @@ def root():
 
             # return redirect(url_for('download_file', name=filename))
 
-            return redirect(url_for("server_url", id=str(cursor.lastrowid)))
+            #return redirect(url_for("server_url", id=str(cursor.lastrowid)))
+            return url_for("download_file",id=str(cursor.lastrowid))
 
     return app.send_static_file("index.html")
 
@@ -140,41 +141,48 @@ def download_file(id):
         return send_from_directory(app.config["UPLOAD_FOLDER"], id + filename)
     else:
         return "not found", 404
+    
+@app.route("/uploads/<id>/vtt")
+def download_file_vtt(id):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], id + ".vtt")
 
+@app.route("/uploads/<id>/thumb")
+def download_file_thumb(id):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], id + ".jpg")
 
 # get the video metadata
-@app.route("/uploads/<id>/data")
-def download_file_data(id):
-    sqliteConnection = sqlite3.connect("sql.db")
-    cursor = sqliteConnection.cursor()
-    cursor.execute("SELECT * FROM files WHERE id = ?", [id])
-    entries = cursor.fetchall()
-    entry = entries[0]
+# @app.route("/uploads/<id>/data")
+# def download_file_data(id):
+#     sqliteConnection = sqlite3.connect("sql.db")
+#     cursor = sqliteConnection.cursor()
+#     cursor.execute("SELECT * FROM files WHERE id = ?", [id])
+#     entries = cursor.fetchall()
+#     entry = entries[0]
 
-    entry_dict = {
-        "id": entry[0],
-        "filename": entry[1],
-        "processed": bool(entry[2]),
-        "json_data": json.loads(entry[3]) if entry[3] else None,
-    }
+#     entry_dict = {
+#         "id": entry[0],
+#         "filename": entry[1],
+#         "processed": bool(entry[2]),
+#         "json_data": json.loads(entry[3]) if entry[3] else None,
+#     }
 
-    return entry_dict
+#     return entry_dict
 
 
 # Serve video as url
-@app.route("/uploads/url/<id>")
-def server_url(id):
-    sqliteConnection = sqlite3.connect("sql.db")
-    cursor = sqliteConnection.cursor()
-    print(id)
-    cursor.execute("SELECT filename FROM files WHERE id = ?", [id])
-    result = cursor.fetchone()
+# @app.route("/uploads/url/<id>")
+# def server_url(id):
+#     sqliteConnection = sqlite3.connect("sql.db")
+#     cursor = sqliteConnection.cursor()
+#     print(id)
+#     cursor.execute("SELECT filename FROM files WHERE id = ?", [id])
+#     result = cursor.fetchone()
 
-    if result:
-        filename = result[0]
-        return url_for("static", filename=("video/" + str(id) + filename))
-    else:
-        return "not found", 404
+#     if result:
+#         filename = result[0]
+#         return url_for("static", filename=("video/" + str(id) + filename))
+#     else:
+#         return "not found", 404
 
 # serve list of videos for the index page
 @app.route("/list")

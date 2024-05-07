@@ -11,8 +11,10 @@
 	let showControls = true;
 	let showControlsTimeout;
 
-    export let fileSource = "";
-    export let thumbNailSource = "";
+	export let fileSource = "";
+
+    let thumbNailSource = fileSource+"/thumb";
+	let subSource = fileSource+"/vtt"
 
 	// Used to track time of last mouse down event
 	let lastMouseDown;
@@ -67,8 +69,9 @@
 		bind:currentTime={time}
 		bind:duration
 		bind:paused
+		crossorigin="anonymous"
 	>
-		<track kind="captions" />
+		<track kind="captions" default src={subSource}/>
 	</video>
 
 	<div class="controls" style="opacity: {duration && showControls ? 1 : 0}">

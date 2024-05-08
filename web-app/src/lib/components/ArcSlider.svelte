@@ -63,6 +63,27 @@
 	}
 
 	const visibleSliderEvents = [{content: "Text"},{content: "Text2"}]; //load these from the captions
+
+
+//Event position math
+	//delta between current timestamp and most forward point on the graph
+	let currentTimeScale = 100; 
+	//value we want to animate currentTimeScale towards (so the transition is smooth)
+	let targetTimeScale = 50; 
+	//ammount to change current by until = target (calc as a percentage), only set this at the beginning of the animation
+	let animationStep = 0.1 * Math.abs(currentTimeScale-targetTimeScale); 
+
+	//to show the current state
+		//for each point that is to be shown
+			//figure out what percentage of currentTimeScale the point is
+			//multiply by the angle
+
+			//if the point is more than the timescale
+				//remove
+				//add next unloaded point
+				//recalculate timescale
+				//set target timescale and animation step
+
 </script>
 
 <!-- <div class="container" bind:offsetWidth={containerWidth}>
@@ -89,16 +110,17 @@
 	class = "elipse-path" id = "elipsePath" style="--elipse-width: {maxRadius*2}px; --elipse-height: {maxHeight*2}px; border-color:{trackColor};">
 	</div>
 	
-<div
-	class="box"
+	<div
+		class="box"
+		style="transform:
+			translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
+	/>
 
-	style="transform:
-		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
-/>
 	{#each visibleSliderEvents as chip}
 		<div class="box" style="transform:
 		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;">{chip.content}</div>
 	{/each}
+
 </div>
 	
 <style>

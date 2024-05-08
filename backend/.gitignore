@@ -1,1 +1,5 @@
 sql.db
+BackendEnv/Include/
+BackendEnv/Lib/
+BackendEnv/Scripts/
+BackendEnv/pyenv.cfg

@@ -1,10 +1,12 @@
 <script>
+    import { writable } from "svelte/store";
+
     //import { Border, Grid } from "$lib/components"
 
 	import ArcSlider from "./ArcSlider.svelte";
 
 	// These values are bound to properties of the video
-	let time = 0;
+	let time = writable(0); //i cant remember why i changed this
 	let duration;
 	let paused = true;
 
@@ -15,6 +17,8 @@
 
     let thumbNailSource = fileSource+"/thumb";
 	let subSource = fileSource+"/vtt"
+
+	let captionTrack;
 
 	// Used to track time of last mouse down event
 	let lastMouseDown;
@@ -31,7 +35,7 @@
 
 		const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
 		const { left, right } = this.getBoundingClientRect();
-		time = (duration * (clientX - left)) / (right - left);
+		$time = (duration * (clientX - left)) / (right - left);
 	}
 
 	// we can't rely on the built-in click event, because it fires
@@ -66,24 +70,24 @@
 		on:touchmove|preventDefault={handleMove}
 		on:mousedown={handleMousedown}
 		on:mouseup={handleMouseup}
-		bind:currentTime={time}
+		bind:currentTime={$time}
 		bind:duration
 		bind:paused
 		crossorigin="anonymous"
 	>
-		<track kind="captions" default src={subSource}/>
+		<track kind="captions" id="captionTrack" default src={subSource} bind:this={captionTrack}/>
 	</video>
 
 	<div class="controls" style="opacity: {duration && showControls ? 1 : 0}">
-		<progress value={time / duration || 0} />
+		<progress value={$time / duration || 0} />
 
 		<div class="info">
-			<span class="time">{format(time)}</span>
+			<span class="time">{format($time)}</span>
 			<span>click anywhere to {paused ? 'play' : 'pause'} / drag to seek</span>
 			<span class="time">{format(duration)}</span>
 		</div>
 	</div>
-	<ArcSlider/>
+	<ArcSlider bind:time={$time} captionTrack={captionTrack} duration={duration}/>
 </div>
 
 <style>

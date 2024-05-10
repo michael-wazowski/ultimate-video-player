@@ -1,8 +1,8 @@
 <script>
-	import { spring } from 'svelte/motion';
-	import { pannable } from '../core/pannable';
+	import { tweened } from "svelte/motion";
+	import { pannable } from "../core/pannable";
+	import { onMount } from "svelte";
 
-	const coords = { x: 0, y: 0, xP: 0};
 	export let trackColor = "";
 	export let thumbColor = "";
 	export let height = 0;
@@ -10,7 +10,10 @@
 	export let thumbHeight = 25;
 	// Represents the percentage of the track from the left to the right where the thumb is, from 0 to 1 representing 0-100
 	export let positionPercentage = 0;
-	
+
+	/*
+	const coords = { x: 0, y: 0, xP: 0};
+
 	let maxRadius = 500;
 	let maxHeight = height <= 0 ? 60 : height;
 	let containerWidth = maxRadius*2;
@@ -61,32 +64,140 @@
 		//coords.x = 0;
 		//coords.y = getElipsicalY()*-1;
 	}
+*/
 
-	const visibleSliderEvents = [{content: "Text"},{content: "Text2"}]; //load these from the captions
+	let maxRadius = 500;
+	let maxHeight = height <= 0 ? 60 : height;
+	let containerWidth = maxRadius * 2;
 
+	export let time;
+	export let captionTrack;
+	export let duration;
 
-//Event position math
+	//all of the events from the captions marked with "IP" (interest point)
+	let sliderEvents = [];
+
+	//all of the events from slider events currently visible
+	let visibleSliderEvents = [];
+	//let visibleSliderEvents = [{content: "Text",time: 10},{content: "Text2", time: 30},{content: "Text3", time: 60},{content: "Text4", time: 120}];
+	//let visibleSliderEvents = [{content: "Text2", angle: 25.8419, time: 120}];
+
+	function handlePanStart() {
+		//update the mouse cursor css
+	}
+
+	$: if (containerWidth) {
+		maxRadius = containerWidth / 2;
+	}
+
+	function handlePanMove(event) {
+		//what is the new time going to be
+		//minus because the mouse moves left = time goes forward
+		//division by 300 just a rough estimate, mouse movement feels pretty 1:1 with the resulting rotation
+		let proposedTime = time - event.detail.dx * ($currentTimeScale / 300);
+
+		//dont run off the end of the video
+		if (proposedTime < 0) {
+			proposedTime = 0;
+		} else if (proposedTime > duration) {
+			proposedTime = duration;
+		}
+
+		//update the actual time
+		time = proposedTime;
+	}
+
+	function handlePanEnd(event) {
+		//update the mouse cursor css
+	}
+
+	//get each of the cues from captionTrack with id = "IP"
+	function processCaptionTrack() {
+		if (typeof captionTrack != "undefined") {
+			let cues = captionTrack.track.cues;
+
+			for (let index = 0; index < cues.length; index++) {
+				const cue = cues[index];
+
+				if (cue.id == "IP") {
+					console.log(cue.id);
+					sliderEvents.push({
+						content: cue.text,
+						time: cue.startTime,
+					});
+				}
+			}
+		}
+	}
+
+	//this is copied from VideoPlayer, is there some way to use that ones function without having to redefine here?
+	function format(seconds) {
+		if (isNaN(seconds)) return "...";
+
+		const minutes = Math.floor(seconds / 60);
+		seconds = Math.floor(seconds % 60);
+		if (seconds < 10) seconds = "0" + seconds;
+
+		return `${minutes}:${seconds}`;
+	}
+
+	//When time changes, figure out the state of our chips
+	$: handleTime(time);
+
+	//Force it to change when page loads (this relies on captionTrack loading fast)
+	setTimeout(() => {
+		time += 0.0001;
+	}, 50);
+
+	//TODO
+	//dynamic timescale
+	//moving backwards
+	async function handleTime(timeV) {
+		//pull all of the cues into an array (the cue list isn't actually an array)
+		if (sliderEvents.length == 0) {
+			processCaptionTrack();
+		}
+
+		//look at the oldest time, is it still within timescale
+		//if not, remove it
+		if (visibleSliderEvents.length > 0) {
+			if (visibleSliderEvents[0].time < timeV - $currentTimeScale) {
+				console.log("late");
+				visibleSliderEvents = visibleSliderEvents.slice(1);
+			}
+		}
+
+		//if we dont have enough events on the slider, get more
+		if (visibleSliderEvents.length < 3 && sliderEvents.length > 1) {
+			//i dont like this line of code
+			while (sliderEvents[0].time < timeV + $currentTimeScale) {
+				visibleSliderEvents.push(sliderEvents[0]);
+
+				sliderEvents = sliderEvents.slice(1);
+
+				//console.log(visibleSliderEvents, sliderEvents);
+			}
+		}
+	}
+
 	//delta between current timestamp and most forward point on the graph
-	let currentTimeScale = 100; 
-	//value we want to animate currentTimeScale towards (so the transition is smooth)
-	let targetTimeScale = 50; 
-	//ammount to change current by until = target (calc as a percentage), only set this at the beginning of the animation
-	let animationStep = 0.1 * Math.abs(currentTimeScale-targetTimeScale); 
+	let currentTimeScale = tweened(60, { duration: 500 });
 
-	//to show the current state
-		//for each point that is to be shown
-			//figure out what percentage of currentTimeScale the point is
-			//multiply by the angle
+	//want to restructure the divs so this doesn't need to be estimated
+	//let y = 0.9
+	//let x=Math.sqrt(1-(y*y))
+	let endAngle = 35; //90 - (Math.atan(y/x) * 180 / Math.PI);
 
-			//if the point is more than the timescale
-				//remove
-				//add next unloaded point
-				//recalculate timescale
-				//set target timescale and animation step
-
+	//haven't got dynamic timescale happening yet
+	function handleClick() {
+		//sets the target to tween() towards
+		$currentTimeScale = 240;
+	}
 </script>
 
-<!-- <div class="container" bind:offsetWidth={containerWidth}>
+<!-- old code for box being the scrollable element on top of a squished elipse 
+	
+	<div class="container" bind:offsetWidth={containerWidth}>
 <div class = "elipse-path" style="--elipse-width: {maxRadius*2}px; --elipse-height: {maxHeight*2}px; border-color:{trackColor};">
 </div>
 
@@ -101,35 +212,74 @@
 />
 </div> -->
 
-<div class="container" bind:offsetWidth={containerWidth}>
-	<div 
-	use:pannable
-	on:panstart={handlePanStart}
-	on:panmove={handlePanMove}
-	on:panend={handlePanEnd}
-	class = "elipse-path" id = "elipsePath" style="--elipse-width: {maxRadius*2}px; --elipse-height: {maxHeight*2}px; border-color:{trackColor};">
-	</div>
-	
-	<div
+<!-- code for the boxes rendered from js, but still on the squished curve (inside pannable)
+		
+		<div
 		class="box"
 		style="transform:
 			translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
-	/>
-
+	/> 
+	
 	{#each visibleSliderEvents as chip}
 		<div class="box" style="transform:
 		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;">{chip.content}</div>
-	{/each}
+	{/each} -->
 
+<button on:click={handleClick} style="transform-origin: 0 0">
+	test button changes timescale
+</button>
+
+<div class="container" bind:offsetWidth={containerWidth}>
+	<div
+		use:pannable
+		on:panstart={handlePanStart}
+		on:panmove={handlePanMove}
+		on:panend={handlePanEnd}
+		class="elipse-path"
+		id="elipsePath"
+		style="--elipse-width: {maxRadius * 2}px; --elipse-height: {maxHeight *
+			2}px; border-color:{trackColor};"
+	></div>
+
+	<div
+		class="rotator"
+		style="--elipse-width: {maxRadius * 2}px; --elipse-height: {maxHeight *
+			2}px; border-color:{trackColor};"
+	>
+		<div
+			class="box"
+			style="transform:
+			translate(0px,-15px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
+		>
+			{":\n" + format(time)}
+		</div>
+	</div>
+
+	{#each visibleSliderEvents as chip}
+		<div
+			class="rotator"
+			style="rotate: {((chip.time - time) / $currentTimeScale) *
+				endAngle}deg ;--elipse-width: {maxRadius *
+				2}px; --elipse-height: {maxHeight *
+				2}px; border-color:{trackColor};"
+		>
+			<div
+				class="box"
+				style="transform: translate(0px,-15px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
+			>
+				{":\n" + format(chip.time) + "\n" + chip.content.slice(0, 20)}
+			</div>
+		</div>
+	{/each}
 </div>
-	
+
 <style>
 	* {
 		--elipse-width: 1000px;
 		--elipse-height: 120px;
 		--track-width: 8px;
 	}
-	
+
 	.box {
 		--width: 15px;
 		--height: 25px;
@@ -137,32 +287,53 @@
 		width: var(--width);
 		height: var(--height);
 		left: calc(50% - var(--width) / 2);
-		top: calc(50% - var(--height) / 2);
+		/*top: calc(50% - var(--height) / 2);*/
 		border-radius: calc(var(--width) / 2);
 		background-color: #ff3e00;
 		cursor: move;
+		color: white;
 	}
 
 	.elipse-path {
 		background-color: transparent;
-		width: calc(var(--elipse-width) - var(--track-width)*2);
-		height: var(--elipse-height);
+		/*width: calc(var(--elipse-width) - var(--track-width)*2);
+		height: var(--elipse-height);*/
 		border-width: var(--track-width);
 		border-color: white;
 		border-style: solid;
 		border-radius: 50%;
 		position: absolute;
-		left: calc(50% - var(--elipse-width)/2);
-		top: calc(50% - var(--elipse-height)/2 - var(--track-width)/2);
-		clip-path: inset(0px 0px 50%);
+		left: calc(50% - var(--elipse-width) / 2);
+		top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2);
 
-		/* width: 100%;
-		aspect-ratio: 1 / 1; */
+		clip-path: inset(0px 0px 90%);
+
+		width: 100%;
+		aspect-ratio: 1 / 1;
+
+		cursor: grab;
+		/* todo make this change on click */
+	}
+
+	.rotator {
+		background-color: transparent;
+		width: 100%;
+		border-width: var(--track-width);
+		border-color: rgba(255, 255, 255, 0);
+		border-style: solid;
+		border-radius: 50%;
+		position: absolute;
+		left: calc(50% - var(--elipse-width) / 2);
+		top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2);
+		aspect-ratio: 1 / 1;
+		pointer-events: none;
+		/*transition: rotate 1s;*/
 	}
 
 	.container {
 		padding-top: 200px;
 		width: 100%;
 		height: 100%;
+		overflow: hidden;
 	}
 </style>

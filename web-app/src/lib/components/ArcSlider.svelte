@@ -1,17 +1,17 @@
 <script>
 	import { tweened } from "svelte/motion";
 	import { pannable } from "../core/pannable";
-	import { onMount } from "svelte";
 
 	export let trackColor = "";
 	export let thumbColor = "";
 	export let height = 0;
-	export let thumbWidth = 15;
+	export let thumbWidth = 5;
 	export let thumbHeight = 25;
+
+	/*
 	// Represents the percentage of the track from the left to the right where the thumb is, from 0 to 1 representing 0-100
 	export let positionPercentage = 0;
 
-	/*
 	const coords = { x: 0, y: 0, xP: 0};
 
 	let maxRadius = 500;
@@ -149,13 +149,18 @@
 		time += 0.0001;
 	}, 50);
 
+	let processed = false;
+
 	//TODO
-	//dynamic timescale
+	//dynamic timescale (base off of min angle between points?)
 	//moving backwards
 	async function handleTime(timeV) {
 		//pull all of the cues into an array (the cue list isn't actually an array)
-		if (sliderEvents.length == 0) {
+		if (sliderEvents.length == 0 && !processed) {
 			processCaptionTrack();
+			console.log("Process caption track");
+		} else {
+			processed = true;
 		}
 
 		//look at the oldest time, is it still within timescale
@@ -176,6 +181,17 @@
 				sliderEvents = sliderEvents.slice(1);
 
 				//console.log(visibleSliderEvents, sliderEvents);
+			}
+		}
+
+		if (visibleSliderEvents.length > 0 && sliderEvents.length > 0) {
+			if (
+				visibleSliderEvents[visibleSliderEvents.length - 1].time < timeV
+			) {
+				console.log("hi");
+				$currentTimeScale = sliderEvents[0].time - timeV;
+				visibleSliderEvents.push(sliderEvents[0]);
+				sliderEvents = sliderEvents.slice(1);
 			}
 		}
 	}
@@ -225,10 +241,6 @@
 		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;">{chip.content}</div>
 	{/each} -->
 
-<button on:click={handleClick} style="transform-origin: 0 0">
-	test button changes timescale
-</button>
-
 <div class="container" bind:offsetWidth={containerWidth}>
 	<div
 		use:pannable
@@ -251,7 +263,10 @@
 			style="transform:
 			translate(0px,-15px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
 		>
-			{":\n" + format(time)}
+			<div class="boxText">
+				<br><br><br>
+				{format(time)}
+			</div>
 		</div>
 	</div>
 
@@ -267,17 +282,25 @@
 				class="box"
 				style="transform: translate(0px,-15px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
 			>
-				{":\n" + format(chip.time) + "\n" + chip.content.slice(0, 20)}
+				<div class="boxText">
+					{format(chip.time)}
+					<br />
+					{chip.content.slice(0, 20)}
+				</div>
 			</div>
 		</div>
 	{/each}
 </div>
 
+<button on:click={handleClick} style="transform-origin: 0 0">
+	test button changes timescale
+</button>
+
 <style>
 	* {
 		--elipse-width: 1000px;
 		--elipse-height: 120px;
-		--track-width: 8px;
+		--track-width: 4px;
 	}
 
 	.box {
@@ -292,6 +315,16 @@
 		background-color: #ff3e00;
 		cursor: move;
 		color: white;
+	}
+
+	.boxText {
+		width: 80px;
+		text-align: center;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, 25%);
+		font-size: 15px;
 	}
 
 	.elipse-path {

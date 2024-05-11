@@ -17,3 +17,8 @@ Team Members:
 <code>cd web-app & npm install & npm run dev</code>
 
 <code>cd backend && flask run --port 8000</code>
+
+
+## Note for Jayden, how to expose the stack
+- tailscale funnel -https 10000 127.0.0.1:8000
+- tailscale funnel 127.0.0.1:5173

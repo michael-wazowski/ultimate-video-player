@@ -74,6 +74,7 @@
 		bind:duration
 		bind:paused
 		crossorigin="anonymous"
+		id="video"
 	>
 		<track kind="captions" id="captionTrack" default src={subSource} bind:this={captionTrack}/>
 	</video>

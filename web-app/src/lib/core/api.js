@@ -1,9 +1,9 @@
 // Functions defining http requests to the api for use in the client
 
 // Request the list of videos and their information in the database
-export async function getVideos()  {
+export async function getVideos(BACKEND_URL)  {
     try{
-        let response = await fetch('http://127.0.0.1:8000/list', {
+        let response = await fetch(BACKEND_URL+'/list', {
             method: 'GET',
             headers: {
                 'content-type': 'application/json',

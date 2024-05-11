@@ -127,6 +127,12 @@
 					});
 				}
 			}
+
+			sliderEvents.push({
+						content: "End of Content",
+						time: duration,
+				});
+
 		}
 	}
 
@@ -147,13 +153,15 @@
 	//Force it to change when page loads (this relies on captionTrack loading fast)
 	setTimeout(() => {
 		time += 0.0001;
-	}, 50);
+	}, 100);
 
 	let processed = false;
 
-	//TODO
-	//dynamic timescale (base off of min angle between points?)
-	//moving backwards
+	let sliderLI = 0; //slider event search index
+	let sliderRI = 0;
+
+	let zoomThresh = 0; //trying to stop quick snaps
+
 	async function handleTime(timeV) {
 		//pull all of the cues into an array (the cue list isn't actually an array)
 		if (sliderEvents.length == 0 && !processed) {
@@ -163,36 +171,164 @@
 			processed = true;
 		}
 
-		//look at the oldest time, is it still within timescale
+		//look at the oldest / newest time, is it still within timescale
 		//if not, remove it
 		if (visibleSliderEvents.length > 0) {
-			if (visibleSliderEvents[0].time < timeV - $currentTimeScale) {
+			while (visibleSliderEvents[0].time < timeV - $currentTimeScale) {
 				console.log("late");
 				visibleSliderEvents = visibleSliderEvents.slice(1);
+				sliderLI++;
+				console.log("sliderLI", sliderLI);
+			}
+
+			while (visibleSliderEvents[visibleSliderEvents.length-1].time > timeV + $currentTimeScale + $currentTimeScale) {
+				console.log("early");
+				visibleSliderEvents = visibleSliderEvents.slice(0,-2);
+				sliderRI--;
+				console.log("sliderRI", sliderRI);
 			}
 		}
 
-		//if we dont have enough events on the slider, get more
-		if (visibleSliderEvents.length < 3 && sliderEvents.length > 1) {
-			//i dont like this line of code
-			while (sliderEvents[0].time < timeV + $currentTimeScale) {
-				visibleSliderEvents.push(sliderEvents[0]);
+		// //if we dont have enough events on the slider, get more
+		// if (sliderEvents.length > 1) { //visibleSliderEvents.length < 3 &&
+		// 	//i dont like this line of code
+		// 	while (sliderEvents[0].time < timeV + $currentTimeScale) {
+		// 		visibleSliderEvents.push(sliderEvents[0]);
 
-				sliderEvents = sliderEvents.slice(1);
+		// 		sliderEvents = sliderEvents.slice(1);
 
-				//console.log(visibleSliderEvents, sliderEvents);
+		// 		//console.log(visibleSliderEvents, sliderEvents);
+		// 	}
+		// }
+
+		//if there are 2 events or more
+		if (sliderEvents.length > 1) {
+
+			//dont go off the end of the array
+			if (sliderRI < sliderEvents.length){
+
+				//expand the visible slider events slice to be all events within timescale
+				while (sliderEvents[sliderRI].time < timeV + $currentTimeScale) {
+
+					//somehow check if the next event is too close to the previous one and don't add it until the timescale adjustment wont force it out
+					
+					sliderRI++;
+					visibleSliderEvents = sliderEvents.slice(sliderLI,sliderRI);
+					
+					console.log("SliderRI", sliderRI);
+
+					if(sliderRI == sliderEvents.length){
+						break;
+					}
+
+				}
 			}
+
+			//dont go off the end of the array
+			if (sliderLI > 0) {
+				//expand the visible slider events slice to be all events within timescale
+				while (sliderEvents[sliderLI-1].time > timeV - $currentTimeScale) {
+
+					sliderLI--;
+					visibleSliderEvents = sliderEvents.slice(sliderLI,sliderRI);
+					
+					console.log("SliderLI", sliderLI);
+
+					if(sliderLI == 0){
+						break;
+					}
+
+				}
+			}
+			//console.log(visibleSliderEvents,sliderLI,sliderRI)
 		}
+
+		// if (visibleSliderEvents.length > 0 && sliderEvents.length > 0) {
+		// 	//if the there are no events on the right of the slider
+		// 	if (
+		// 		visibleSliderEvents[visibleSliderEvents.length - 1].time < timeV
+		// 	) {
+		// 		console.log("Nothing On RHS, pulling new Chip");
+		// 		$currentTimeScale = sliderEvents[0].time - timeV;
+		// 		visibleSliderEvents.push(sliderEvents[0]);
+		// 		sliderEvents = sliderEvents.slice(1);
+		// 	}
+		// }
 
 		if (visibleSliderEvents.length > 0 && sliderEvents.length > 0) {
+			//if the there are no events on the right of the slider
 			if (
 				visibleSliderEvents[visibleSliderEvents.length - 1].time < timeV
 			) {
-				console.log("hi");
-				$currentTimeScale = sliderEvents[0].time - timeV;
-				visibleSliderEvents.push(sliderEvents[0]);
-				sliderEvents = sliderEvents.slice(1);
+				if (sliderRI + 1 < sliderEvents.length){
+					console.log("Nothing On RHS, pulling new Chip");
+					//visibleSliderEvents.push(sliderEvents[sliderRI]);
+
+					sliderRI++;
+					visibleSliderEvents = sliderEvents.slice(sliderLI,sliderRI);
+
+					//$currentTimeScale = sliderEvents[sliderRI].time - timeV;
+
+					console.log("SliderRI", sliderRI);
+
+				}
 			}
+		}
+
+		//find the smallest difference between two chips and adjust timescale so they dont overlap
+		if (visibleSliderEvents.length >= 2) {
+			let smallestPDelta = 100;
+			let T1 = null;
+			let T2 = null;
+
+			for (let index = 1; index < visibleSliderEvents.length; index++) {
+
+				//times
+				const eventTime = visibleSliderEvents[index].time;
+				const previousEventTime = visibleSliderEvents[index - 1].time;
+
+				let percentage = (eventTime - time) / $currentTimeScale;
+				let previousPercentage = (previousEventTime - time) / $currentTimeScale;
+
+				let PDelta = percentage - previousPercentage;
+
+
+				let potentialTimeScale = ((eventTime-time)-(previousEventTime-time))/0.24
+				let potentialPercentage = (eventTime - time) / potentialTimeScale;
+				let potentialPercentage2 = (previousEventTime - time) / potentialTimeScale;
+
+				if (potentialPercentage > 1 || potentialPercentage2 > 1 || (percentage < 0 && previousPercentage < 0)){
+					//console.log(potentialPercentage);
+				}else {
+
+					if (PDelta < smallestPDelta) {
+						smallestPDelta = PDelta;
+						T2 = eventTime;
+						T1 = previousEventTime;
+					}
+				}
+			}
+
+			smallestPDelta = Math.round(smallestPDelta * 100000) / 100000;
+
+			//todo, add some kind of check for if this will shove the things out of view
+			if (zoomThresh <= 0 && T1 != null && T2 != null){
+				if (smallestPDelta < 0.23) {
+					$currentTimeScale = ((T2-time)-(T1-time))/0.24
+					console.log(smallestPDelta, $currentTimeScale, "zoom in")
+					zoomThresh = 10;
+				} else if (smallestPDelta > 0.5) {
+					$currentTimeScale = ((T2 - time) - (T1 - time)) / 0.5;
+					console.log(smallestPDelta, $currentTimeScale, "zoom out");
+					zoomThresh = 10;
+				}
+			} else {
+				console.log(zoomThresh);
+				zoomThresh--;
+			}
+			// } else{
+			// 	console.log(smallestPDelta, $currentTimeScale)
+			// }
 		}
 	}
 
@@ -249,22 +385,17 @@
 		on:panend={handlePanEnd}
 		class="elipse-path"
 		id="elipsePath"
-		style="--elipse-width: {maxRadius * 2}px; --elipse-height: {maxHeight *
-			2}px; border-color:{trackColor};"
+		style="border-color:{trackColor};"
 	></div>
 
-	<div
-		class="rotator"
-		style="--elipse-width: {maxRadius * 2}px; --elipse-height: {maxHeight *
-			2}px; border-color:{trackColor};"
-	>
+	<div class="rotator" style="border-color:{trackColor};">
 		<div
 			class="box"
 			style="transform:
 			translate(0px,-15px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
 		>
 			<div class="boxText">
-				<br><br><br>
+				<br /><br /><br />
 				{format(time)}
 			</div>
 		</div>
@@ -274,9 +405,7 @@
 		<div
 			class="rotator"
 			style="rotate: {((chip.time - time) / $currentTimeScale) *
-				endAngle}deg ;--elipse-width: {maxRadius *
-				2}px; --elipse-height: {maxHeight *
-				2}px; border-color:{trackColor};"
+				endAngle}deg ; border-color:{trackColor};"
 		>
 			<div
 				class="box"
@@ -298,8 +427,8 @@
 
 <style>
 	* {
-		--elipse-width: 1000px;
-		--elipse-height: 120px;
+		/*--elipse-width: 1000px;
+		--elipse-height: 120px;*/
 		--track-width: 4px;
 	}
 
@@ -336,8 +465,8 @@
 		border-style: solid;
 		border-radius: 50%;
 		position: absolute;
-		left: calc(50% - var(--elipse-width) / 2);
-		top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2);
+		/*left: calc(50% - var(--elipse-width) / 2);
+		 top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2); */
 
 		clip-path: inset(0px 0px 90%);
 
@@ -354,19 +483,24 @@
 		border-width: var(--track-width);
 		border-color: rgba(255, 255, 255, 0);
 		border-style: solid;
-		border-radius: 50%;
 		position: absolute;
-		left: calc(50% - var(--elipse-width) / 2);
-		top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2);
+		/*left: calc(50% - var(--elipse-width) / 2);
+		 top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2); */
 		aspect-ratio: 1 / 1;
 		pointer-events: none;
 		/*transition: rotate 1s;*/
 	}
 
 	.container {
-		padding-top: 200px;
+		/*padding-top: 200px;
+		height: 100%;*/
+
+		padding-top: 11px;
+
+		aspect-ratio: 9 / 1;
+
 		width: 100%;
-		height: 100%;
+
 		overflow: hidden;
 	}
 </style>

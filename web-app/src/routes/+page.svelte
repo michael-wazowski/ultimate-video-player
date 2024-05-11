@@ -19,7 +19,7 @@
 
 	let currentFile;
 	const videoShowing = writable(false);
-	const BACKEND_URL = "http://127.0.0.1:8000";
+	const BACKEND_URL = "http://127.0.0.1:8000"; //"https://carbonlaptop.tail0a458.ts.net:10000"
 
 	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
 	$: if(currentFile && blockUpload == false){
@@ -33,7 +33,7 @@
 
 	// Querys the python server from the client side, returns the list of videos the client has
 	async function queryVideos() {
-		return await getVideos();
+		return await getVideos(BACKEND_URL);
 	}
 
 	// Callback that takes a videos id, gets the filename and then changes the video player source to the url for the video

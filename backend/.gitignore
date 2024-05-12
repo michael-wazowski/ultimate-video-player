@@ -3,3 +3,5 @@ BackendEnv/Include/
 BackendEnv/Lib/
 BackendEnv/Scripts/
 BackendEnv/pyvenv.cfg
+BackendEnv/Library/
+BackendEnv/share

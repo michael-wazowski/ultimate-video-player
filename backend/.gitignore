@@ -5,3 +5,4 @@ BackendEnv/Scripts/
 BackendEnv/pyvenv.cfg
 BackendEnv/Library/
 BackendEnv/share
+*.jpg

@@ -1,5 +1,6 @@
 import whisper
 from whisper.utils import get_writer
+import os
 
 def STTFunction(path, id):
     model = whisper.load_model("base")
@@ -9,6 +10,6 @@ def STTFunction(path, id):
     #print(f' The text in video: \n {result["text"]}')
 
 if __name__ == "__main__":
-    inputPath = """static/video/subtitles.mp4"""
+    inputPath = os.path.join(os.path.dirname(__file__), "static","video", "video.mp4")
     print("Running STT Function")
-    STTFunction(inputPath, 2)
+    STTFunction(inputPath, 4)

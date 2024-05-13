@@ -1,17 +1,38 @@
 <script>
     import Border from "./Border.svelte";
     import Grid from "./Grid.svelte";
+    const BACKEND_URL = "http://127.0.0.1:8000";
 
     export let thumbNailUrl = "";
     export let title = "";
-    export let length = 0.0;
+    export let id = 0;
+    let lengthMinutes = 0.0;
+    let duration = 0.0
     export let clickBinding;
+
+    // We can get just a videos metadata with the video tag
+    let metadataSource = BACKEND_URL + "/uploads/"  + id;
+
+    function format(seconds) {
+		if (isNaN(seconds)) return '...';
+
+		const minutes = Math.floor(seconds / 60);
+		seconds = Math.floor(seconds % 60);
+		if (seconds < 10) seconds = '0' + seconds;
+
+		return `${minutes}:${seconds}`;
+	}
+
+    $: lengthMinutes = format(duration);
 </script>
 
 <button on:click={clickBinding} style="flex: 0 1 300px ; align-self: flex-start; overflow-x: wrap; overflow-y: hidden;">
+    <video style="display: none;" src="{metadataSource}" preload="metadata" bind:duration crossorigin="anonymous">
+        <track kind="captions"/>
+    </video>
     <Grid rows="1fr auto">
         <div style="width: 100%; height: 100%">
-            <p>{length}</p>
+            <p>{lengthMinutes}</p>
             <img src={thumbNailUrl} alt="thumbnail">
         </div>
 

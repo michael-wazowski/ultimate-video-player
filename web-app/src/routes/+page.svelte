@@ -98,7 +98,7 @@
 			{:then videos}
 				<div class="uploaded-list-container" style="display: flex; flex-wrap: wrap;">
 					{#each videos as { filename, id }, i}
-						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} length=12.2 />
+						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} id={id}/>
 					{/each}
 				</div>
 			{/await}

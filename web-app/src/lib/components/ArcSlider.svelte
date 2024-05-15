@@ -55,6 +55,7 @@
 
 	//get each of the cues from captionTrack with id = "IP"
 	function processCaptionTrack() {
+		sliderEvents = [];
 		if (typeof captionTrack != "undefined") {
 			let cues = captionTrack.track.cues;
 
@@ -62,7 +63,6 @@
 				const cue = cues[index];
 
 				if (cue.id == "IP") {
-					console.log(cue.id);
 					sliderEvents.push({
 						content: cue.text,
 						time: cue.startTime,
@@ -70,10 +70,14 @@
 				}
 			}
 
-			sliderEvents.push({
+			if (sliderEvents.length != 0){
+				sliderEvents.push({
 						content: "End of Content",
 						time: duration,
 				});
+			}
+
+			
 
 		}
 	}
@@ -84,6 +88,7 @@
 
 	//Force it to change when page loads (this relies on captionTrack loading fast)
 	setTimeout(() => {
+		sliderEvents = []
 		time += 0.0001;
 	}, 100);
 

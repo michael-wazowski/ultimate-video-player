@@ -3,14 +3,10 @@
 	import { pannable } from "../core/pannable";
 	import { formatToMins } from "$lib/core/formatting";
 
-	export let trackColor = "";
-	export let thumbColor = "";
-	export let height = 0;
-	export let thumbWidth = 5;
-	export let thumbHeight = 25;
-
-	let maxRadius = 500;
-	let containerWidth = maxRadius * 2;
+	let trackColor = "";
+	let thumbColor = "";
+	let thumbWidth = 5;
+	let thumbHeight = 25;
 
 	export let time;
 	export let captionTrack;
@@ -26,10 +22,6 @@
 
 	function handlePanStart() {
 		//update the mouse cursor css
-	}
-
-	$: if (containerWidth) {
-		maxRadius = containerWidth / 2;
 	}
 
 	function handlePanMove(event) {
@@ -53,36 +45,6 @@
 		//update the mouse cursor css
 	}
 
-	//get each of the cues from captionTrack with id = "IP"
-	function processCaptionTrack() {
-		sliderEvents = [];
-		if (typeof captionTrack != "undefined") {
-			let cues = captionTrack.track.cues;
-
-			for (let index = 0; index < cues.length; index++) {
-				const cue = cues[index];
-
-				if (cue.id == "IP") {
-					sliderEvents.push({
-						content: cue.text,
-						time: cue.startTime,
-					});
-				}
-			}
-
-			if (sliderEvents.length != 0){
-				sliderEvents.push({
-						content: "End of Content",
-						time: duration,
-				});
-			}
-
-			
-
-		}
-	}
-
-	
 	//When time changes, figure out the state of our chips
 	$: handleTime(time);
 
@@ -174,7 +136,6 @@
 					if(sliderLI == 0){
 						break;
 					}
-
 				}
 			}
 			//console.log(visibleSliderEvents,sliderLI,sliderRI)
@@ -266,9 +227,32 @@
 				console.log(zoomThresh);
 				zoomThresh--;
 			}
-			// } else{
-			// 	console.log(smallestPDelta, $currentTimeScale)
-			// }
+		}
+	}
+
+	//get each of the cues from captionTrack with id = "IP"
+	function processCaptionTrack() {
+		sliderEvents = [];
+		if (typeof captionTrack != "undefined") {
+			let cues = captionTrack.track.cues;
+
+			for (let index = 0; index < cues.length; index++) {
+				const cue = cues[index];
+
+				if (cue.id == "IP") {
+					sliderEvents.push({
+						content: cue.text,
+						time: cue.startTime,
+					});
+				}
+			}
+
+			if (sliderEvents.length != 0){
+				sliderEvents.push({
+						content: "End of Content",
+						time: duration,
+				});
+			}	
 		}
 	}
 
@@ -287,37 +271,7 @@
 	}
 </script>
 
-<!-- old code for box being the scrollable element on top of a squished elipse 
-	
-	<div class="container" bind:offsetWidth={containerWidth}>
-<div class = "elipse-path" style="--elipse-width: {maxRadius*2}px; --elipse-height: {maxHeight*2}px; border-color:{trackColor};">
-</div>
-
-<div
-	class="box"
-	use:pannable
-	on:panstart={handlePanStart}
-	on:panmove={handlePanMove}
-	on:panend={handlePanEnd}
-	style="transform:
-		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
-/>
-</div> -->
-
-<!-- code for the boxes rendered from js, but still on the squished curve (inside pannable)
-		
-		<div
-		class="box"
-		style="transform:
-			translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
-	/> 
-	
-	{#each visibleSliderEvents as chip}
-		<div class="box" style="transform:
-		translate({coords.x}px,{coords.y}px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;">{chip.content}</div>
-	{/each} -->
-
-<div class="container" bind:offsetWidth={containerWidth}>
+<div class="container" >
 	<div
 		use:pannable
 		on:panstart={handlePanStart}
@@ -367,8 +321,6 @@
 
 <style>
 	* {
-		/*--elipse-width: 1000px;
-		--elipse-height: 120px;*/
 		--track-width: 4px;
 	}
 
@@ -379,7 +331,6 @@
 		width: var(--width);
 		height: var(--height);
 		left: calc(50% - var(--width) / 2);
-		/*top: calc(50% - var(--height) / 2);*/
 		border-radius: calc(var(--width) / 2);
 		background-color: #ff3e00;
 		cursor: move;
@@ -398,15 +349,11 @@
 
 	.elipse-path {
 		background-color: transparent;
-		/*width: calc(var(--elipse-width) - var(--track-width)*2);
-		height: var(--elipse-height);*/
 		border-width: var(--track-width);
 		border-color: white;
 		border-style: solid;
 		border-radius: 50%;
 		position: absolute;
-		/*left: calc(50% - var(--elipse-width) / 2);
-		 top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2); */
 
 		clip-path: inset(0px 0px 90%);
 
@@ -424,17 +371,11 @@
 		border-color: rgba(255, 255, 255, 0);
 		border-style: solid;
 		position: absolute;
-		/*left: calc(50% - var(--elipse-width) / 2);
-		 top: calc(50% - var(--elipse-height) / 2 - var(--track-width) / 2); */
 		aspect-ratio: 1 / 1;
 		pointer-events: none;
-		/*transition: rotate 1s;*/
 	}
 
 	.container {
-		/*padding-top: 200px;
-		height: 100%;*/
-
 		padding-top: 11px;
 
 		aspect-ratio: 9 / 1;

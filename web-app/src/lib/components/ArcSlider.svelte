@@ -10,7 +10,6 @@
 	export let thumbHeight = 25;
 
 	let maxRadius = 500;
-	let maxHeight = height <= 0 ? 60 : height;
 	let containerWidth = maxRadius * 2;
 
 	export let time;
@@ -220,20 +219,23 @@
 				const eventTime = visibleSliderEvents[index].time;
 				const previousEventTime = visibleSliderEvents[index - 1].time;
 
+				//percentage of each time between current and current + timescale
 				let percentage = (eventTime - time) / $currentTimeScale;
 				let previousPercentage = (previousEventTime - time) / $currentTimeScale;
 
+				//difference in percentage between the 2 times
 				let PDelta = percentage - previousPercentage;
 
-
+				//what would happen if we zoomed in
 				let potentialTimeScale = ((eventTime-time)-(previousEventTime-time))/0.24
 				let potentialPercentage = (eventTime - time) / potentialTimeScale;
 				let potentialPercentage2 = (previousEventTime - time) / potentialTimeScale;
 
+				//would the zoom be outside of scale / or be happening on the left side of the slider
 				if (potentialPercentage > 1 || potentialPercentage2 > 1 || (percentage < 0 && previousPercentage < 0)){
 					//console.log(potentialPercentage);
 				}else {
-
+					//if valid zoom
 					if (PDelta < smallestPDelta) {
 						smallestPDelta = PDelta;
 						T2 = eventTime;

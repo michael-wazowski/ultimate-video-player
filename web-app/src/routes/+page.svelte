@@ -81,7 +81,7 @@
 
 <DeleteDialog bind:this={deleteVideoDialog} confirmedDelte={(id) => {confirmedDelte(id)}}/>
 <h1>
-	<a on:click={()=>videoShowing.set(false)} href="/">Ultimate Video Player</a>
+	<a on:click={()=>{videoShowing.set(false);promise = queryVideos()}} href="/">Ultimate Video Player</a>
 </h1>
 {#if $videoShowing === true }
 	<svelte:component this="{VideoPlayer}" fileSource={dynamicVideo}/>

@@ -1,6 +1,6 @@
 <script>
     import { writable } from "svelte/store";
-
+	import { formatToMins } from "$lib/core/formatting";
     //import { Border, Grid } from "$lib/components"
 
 	import ArcSlider from "./ArcSlider.svelte";
@@ -51,15 +51,6 @@
 		}
 	}
 
-	function format(seconds) {
-		if (isNaN(seconds)) return '...';
-
-		const minutes = Math.floor(seconds / 60);
-		seconds = Math.floor(seconds % 60);
-		if (seconds < 10) seconds = '0' + seconds;
-
-		return `${minutes}:${seconds}`;
-	}
 </script>
 
 <div style="width: 70%; margin: 0 auto; margin-left: 5%">
@@ -83,9 +74,9 @@
 		<progress value={$time / duration || 0} />
 
 		<div class="info">
-			<span class="time">{format($time)}</span>
+			<span class="time">{formatToMins($time)}</span>
 			<span>click anywhere to {paused ? 'play' : 'pause'} / drag to seek</span>
-			<span class="time">{format(duration)}</span>
+			<span class="time">{formatToMins(duration)}</span>
 		</div>
 	</div>
 	<ArcSlider bind:time={$time} captionTrack={captionTrack} duration={duration}/>

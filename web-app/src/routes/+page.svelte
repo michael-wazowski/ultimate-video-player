@@ -2,11 +2,12 @@
 	import { writable, get } from 'svelte/store';
 	import { Guid } from "js-guid";
 	
-	import { getVideos } from "$lib/core/api";
+	import { getVideos, deleteVideo } from "$lib/core/api";
     import VideoPlayer from "../lib/components/VideoPlayer.svelte";
 	import Grid from "../lib/components/Grid.svelte";
 	import Border from "../lib/components/Border.svelte";
 	import VideoThumbnail from '../lib/components/VideoThumbnail.svelte';
+	import DeleteDialog from '../lib/components/DeleteVideoDialog.svelte'
 
 	import PlusSymbol from "$lib/assets/plus-symbol.svg";
 
@@ -18,6 +19,7 @@
 	let blockUpload = false;
 
 	let currentFile;
+	let deleteVideoDialog;
 	const videoShowing = writable(false);
 	const BACKEND_URL = "http://127.0.0.1:8000"; //"https://carbonlaptop.tail0a458.ts.net:10000"
 
@@ -38,15 +40,21 @@
 
 	// Callback that takes a videos id, gets the filename and then changes the video player source to the url for the video
 	async function onSelectVideo(id = 0){
-		// gets the static sub url of the video
-		//let response = await getVideoFileUrl(id);
-		//if(response != null){
-			// Video urls are currently static and just a combination of the video id and its filename
 		let absoluteUrl = BACKEND_URL + "/uploads/"+id;
 
 		dynamicVideo = absoluteUrl;
 		videoShowing.set(true);
-		//}
+	}
+
+	async function onDeleteVideo(id = 0, filename){
+		deleteVideoDialog.ShowDialog(id, filename);
+	}
+
+	async function confirmedDelte(id){
+		await deleteVideo(BACKEND_URL, id);
+
+		// Reload videos after deleting one
+		promise = queryVideos();
 	}
 
 	async function handleVideoUpload(event){
@@ -65,10 +73,13 @@
 
 		dynamicVideo = absoluteUrl;
 		videoShowing.set(true);
+
+		// Reload videos after uploading one
+		promise = queryVideos();
 	}
 </script>
 
-
+<DeleteDialog bind:this={deleteVideoDialog} confirmedDelte={(id) => {confirmedDelte(id)}}/>
 <h1>
 	<a on:click={()=>videoShowing.set(false)} href="/">Ultimate Video Player</a>
 </h1>
@@ -98,7 +109,7 @@
 			{:then videos}
 				<div class="uploaded-list-container" style="display: flex; flex-wrap: wrap;">
 					{#each videos as { filename, id }, i}
-						<VideoThumbnail clickBinding={() => onSelectVideo(id)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} id={id}/>
+						<VideoThumbnail clickBinding={() => onSelectVideo(id)} deleteHandler={() => onDeleteVideo(id, filename)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} id={id}/>
 					{/each}
 				</div>
 			{/await}

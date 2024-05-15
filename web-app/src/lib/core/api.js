@@ -22,6 +22,28 @@ export async function getVideos(BACKEND_URL)  {
     }
 }
 
+export async function deleteVideo(BACKEND_URL, id) {
+    console.log(`${BACKEND_URL}/delete/${id}`);
+    try{
+        let response = await fetch(`${BACKEND_URL}/delete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json',
+                'Access-Control-Allow-Origin' : '*',
+            }
+        });
+        if(response.ok){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    catch{
+        return false;
+    }
+}
+
 // Gets the filename of a video in the database, filenames contain the id and the original name of the video for now
 // export async function getVideoFileUrl(id = 0){
 //     try{

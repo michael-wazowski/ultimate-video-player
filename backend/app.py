@@ -33,7 +33,7 @@ sqliteConnection = sqlite3.connect("sql.db")
 cursor = sqliteConnection.cursor()
 cursor.execute(
     """CREATE TABLE IF NOT EXISTS files
-    (id INTEGER PRIMARY KEY, filename TEXT, processed BOOLEAN DEFAULT 0, processed_data TEXT NULL)"""
+    (id INTEGER PRIMARY KEY, filename TEXT, extension TEXT, processed BOOLEAN DEFAULT 0, processed_data TEXT NULL)"""
 )
 sqliteConnection.commit()
 sqliteConnection.close()
@@ -53,21 +53,27 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def autogenerate_thumbnail(video_id):
-    sqliteConnection = sqlite3.connect("sql.db")
-    cursor = sqliteConnection.cursor()
-    cursor.execute("SELECT filename FROM files WHERE id = ?", [video_id])
-    result = cursor.fetchone()
-
-    if result:
-        filename = os.path.join(app.config["UPLOAD_FOLDER"], str(video_id)+ result[0])
+    extension = get_extension(video_id)
+    if extension != "":
+        filename = os.path.join(app.config["UPLOAD_FOLDER"], str(video_id)) + extension
         for frame_count, first_frame in enumerate(ffmpeg.imiter(filename)):
             ffmpeg.imwrite(os.path.join(app.config["UPLOAD_FOLDER"], str(video_id))+".jpg", first_frame)
             break
         
+def get_extension(video_id):
+    sqliteConnection = sqlite3.connect("sql.db")
+    cursor = sqliteConnection.cursor()
+    cursor.execute("SELECT extension FROM files WHERE id = ?", [video_id])
+    result = cursor.fetchone()
+
+    if result:
+        filename = result[0]
+        return filename
+    else:
+        return ""
 
 
-
-#handle file upload (and also host barebones test page)
+#handle file upload and delete (and also host barebones test page)
 @app.route("/", methods=["GET", "POST"])
 def root():
     if request.method == "POST":
@@ -83,17 +89,17 @@ def root():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-
+            extension = "." + filename.split(".")[-1]
             sqliteConnection = sqlite3.connect("sql.db")
             cursor = sqliteConnection.cursor()
-            file_info = (filename, False, None)
+            file_info = (filename, extension, False, None)
             cursor.execute(
-                "INSERT INTO files (filename, processed, processed_data) VALUES (?, ?, ?)",
+                "INSERT INTO files (filename, extension, processed, processed_data) VALUES (?, ?, ?, ?)",
                 file_info,
             )
             sqliteConnection.commit()
 
-            newName = str(cursor.lastrowid) + filename
+            newName = str(cursor.lastrowid) + extension
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], newName))
             autogenerate_thumbnail(cursor.lastrowid)
 
@@ -129,18 +135,41 @@ def serve_player_page():
 # is this one being used?
 @app.route("/uploads/<id>")
 def download_file(id):
-    sqliteConnection = sqlite3.connect("sql.db")
-    cursor = sqliteConnection.cursor()
+    #sqliteConnection = sqlite3.connect("sql.db")
+    #cursor = sqliteConnection.cursor()
     # https://stackoverflow.com/questions/16856647/sqlite3-programmingerror-incorrect-number-of-bindings-supplied-the-current-sta
     # id input MUST be cast to tuple otherwise sql treats each digit as a seperate binding
-    cursor.execute("SELECT filename FROM files WHERE id = ?", [id])
-    result = cursor.fetchone()
+    #cursor.execute("SELECT filename FROM files WHERE id = ?", [id])
+    #result = cursor.fetchone()
+    extension = get_extension(id)
 
-    if result:
-        filename = result[0]
-        return send_from_directory(app.config["UPLOAD_FOLDER"], id + filename)
+    if extension != "":
+        return send_from_directory(app.config["UPLOAD_FOLDER"], id + extension)
     else:
         return "not found", 404
+
+@app.route("/delete/<id>", methods=["DELETE"])
+def delete_file(id):
+    try:
+        extension = get_extension(id)
+
+        if extension != "":
+            try:
+                path = os.path.join(app.config["UPLOAD_FOLDER"], id)
+                os.remove(path + extension)
+                os.remove(path + ".jpg")
+                os.remove(path + ".vtt")
+            except:
+                pass
+        
+        sqliteConnection = sqlite3.connect("sql.db")
+        cursor = sqliteConnection.cursor()
+        cursor.execute("DELETE FROM files WHERE id = ?", [id])
+        sqliteConnection.commit()
+        return "Succes", 200
+    except:
+        return "File already deleted", 204
+
     
 @app.route("/uploads/<id>/vtt")
 def download_file_vtt(id):

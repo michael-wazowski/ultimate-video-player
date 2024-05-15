@@ -1,70 +1,13 @@
 <script>
 	import { tweened } from "svelte/motion";
 	import { pannable } from "../core/pannable";
+	import { formatToMins } from "$lib/core/formatting";
 
 	export let trackColor = "";
 	export let thumbColor = "";
 	export let height = 0;
 	export let thumbWidth = 5;
 	export let thumbHeight = 25;
-
-	/*
-	// Represents the percentage of the track from the left to the right where the thumb is, from 0 to 1 representing 0-100
-	export let positionPercentage = 0;
-
-	const coords = { x: 0, y: 0, xP: 0};
-
-	let maxRadius = 500;
-	let maxHeight = height <= 0 ? 60 : height;
-	let containerWidth = maxRadius*2;
-	
-	function handlePanStart() {
-		coords.stiffness = coords.damping = 1;
-	}
-
-	// postionPercentage is for binding externally to control the position of the thumb, we need to handle when it is changed externally.
-	$: if(positionPercentage != coords.xP){
-		coords.xP = positionPercentage;
-		coords.x = (coords.xP * containerWidth) - (containerWidth/2);
-		coords.y = getElipsicalY()*-1;
-	}
-	
-	$: if(containerWidth){
-		maxRadius = containerWidth/2;
-		coords.x = (coords.xP * containerWidth) - (containerWidth/2);
-	}
-
-	// https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:conics/x9e81a4f98389efdf:ellipse-center-radii/a/ellipse-equation-review
-	function getElipsicalY() {
-		let x = coords.x*coords.x;
-		let a = maxRadius*maxRadius;
-		let b = maxHeight*maxHeight;
-		return Math.sqrt(Math.abs(((b*x)/a) - b));
-	}
-	
-	function handlePanMove(event) {
-		if(coords.x + event.detail.dx > maxRadius){
-			coords.x = maxRadius;
-			coords.y = getElipsicalY()*-1;
-			return;
-		}
-		if(coords.x + event.detail.dx < -maxRadius){
-			coords.x = -maxRadius;
-			coords.y = getElipsicalY()*-1;
-			return;
-		}
-		
-		coords.x = coords.x + event.detail.dx;
-		coords.xP = (coords.x + containerWidth * 0.5) / containerWidth;
-		positionPercentage = coords.xP;
-		coords.y = getElipsicalY()*-1;
-	}
-
-	function handlePanEnd(event) {
-		//coords.x = 0;
-		//coords.y = getElipsicalY()*-1;
-	}
-*/
 
 	let maxRadius = 500;
 	let maxHeight = height <= 0 ? 60 : height;
@@ -136,17 +79,7 @@
 		}
 	}
 
-	//this is copied from VideoPlayer, is there some way to use that ones function without having to redefine here?
-	function format(seconds) {
-		if (isNaN(seconds)) return "...";
-
-		const minutes = Math.floor(seconds / 60);
-		seconds = Math.floor(seconds % 60);
-		if (seconds < 10) seconds = "0" + seconds;
-
-		return `${minutes}:${seconds}`;
-	}
-
+	
 	//When time changes, figure out the state of our chips
 	$: handleTime(time);
 
@@ -396,7 +329,7 @@
 		>
 			<div class="boxText">
 				<br /><br /><br />
-				{format(time)}
+				{formatToMins(time)}
 			</div>
 		</div>
 	</div>
@@ -412,7 +345,7 @@
 				style="transform: translate(0px,-15px); background-color:{thumbColor}; --width:{thumbWidth}px; --height:{thumbHeight}px;"
 			>
 				<div class="boxText">
-					{format(chip.time)}
+					{formatToMins(chip.time)}
 					<br />
 					{chip.content.slice(0, 20)}
 				</div>

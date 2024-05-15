@@ -23,7 +23,6 @@ export async function getVideos(BACKEND_URL)  {
 }
 
 export async function deleteVideo(BACKEND_URL, id) {
-    console.log(`${BACKEND_URL}/delete/${id}`);
     try{
         let response = await fetch(`${BACKEND_URL}/delete/${id}`, {
             method: 'DELETE',

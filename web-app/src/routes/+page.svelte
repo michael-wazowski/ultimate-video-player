@@ -8,6 +8,7 @@
 	import Border from "../lib/components/Border.svelte";
 	import VideoThumbnail from '../lib/components/VideoThumbnail.svelte';
 	import DeleteDialog from '../lib/components/DeleteVideoDialog.svelte'
+	import UploadErrorDialog from '../lib/components/UploadErrorDialog.svelte';
 
 	import PlusSymbol from "$lib/assets/plus-symbol.svg";
 
@@ -20,6 +21,7 @@
 
 	let currentFile;
 	let deleteVideoDialog;
+	let uploadErrorDialog;
 	const videoShowing = writable(false);
 	const BACKEND_URL = "http://127.0.0.1:8000"; //"https://carbonlaptop.tail0a458.ts.net:10000"
 
@@ -57,22 +59,39 @@
 		promise = queryVideos();
 	}
 
+	async function showUploadError(){
+		uploadErrorDialog.ShowDialog();
+	}
+
 	async function handleVideoUpload(event){
 		blockUpload = true;
 		var formData = new FormData();
 		formData.append("file", currentFile.item(0));
 
-		let response = await fetch(BACKEND_URL + "/", {
-      		method: "POST",
-      		body: formData,
-			redirect: 'follow'
-   		});
+		try{
+			let response = await fetch(BACKEND_URL + "/", {
+				method: "POST",
+      			body: formData,
+				redirect: 'follow'
+			});
+			if(response.ok){
+				let subUrl = await response.text();
+				let absoluteUrl = BACKEND_URL + subUrl;
+				
+				dynamicVideo = absoluteUrl;
+				videoShowing.set(true);
+			}
+			else{
+				showUploadError();
 
-		let subUrl = await response.text();
-		let absoluteUrl = BACKEND_URL + subUrl;
+			}
+		}
+		catch{
+			showUploadError();
+		}
 
-		dynamicVideo = absoluteUrl;
-		videoShowing.set(true);
+		currentFile = null;
+		blockUpload = false;
 
 		// Reload videos after uploading one
 		promise = queryVideos();
@@ -80,6 +99,8 @@
 </script>
 
 <DeleteDialog bind:this={deleteVideoDialog} confirmedDelte={(id) => {confirmedDelte(id)}}/>
+<UploadErrorDialog bind:this={uploadErrorDialog}/>
+
 <h1>
 	<a on:click={()=>{videoShowing.set(false);promise = queryVideos()}} href="/">Ultimate Video Player</a>
 </h1>

@@ -89,7 +89,7 @@
 	//Force it to change when page loads (this relies on captionTrack loading fast)
 	setTimeout(() => {
 		sliderEvents = []
-		time += 0.0001;
+		handleTime(time);
 	}, 100);
 
 	let processed = false;

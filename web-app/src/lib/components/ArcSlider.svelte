@@ -354,6 +354,7 @@
 		border-style: solid;
 		border-radius: 50%;
 		position: absolute;
+		height: 100%;
 
 		clip-path: inset(0px 0px 90%);
 

@@ -105,7 +105,7 @@
 	<a on:click={()=>{videoShowing.set(false);promise = queryVideos()}} href="/">Ultimate Video Player</a>
 </h1>
 {#if $videoShowing === true }
-	<svelte:component this="{VideoPlayer}" fileSource={dynamicVideo}/>
+	<VideoPlayer fileSource={dynamicVideo}/>
 {:else}
 	<Grid rows="4rem 20rem 4rem 1fr" columns="10% 80% 10%">
 		<h3 style="grid-column: 2;">Please select a video file to play it back!</h3>
@@ -124,7 +124,7 @@
 
 		<h3 style="grid-column: 2;"> Or select an existing video to watch it again!</h3>
 
-		<Border height="100%" width="100%" corner="15px" style="grid-column: 2; overflow-y: scroll; overflow-x: hidden; height: 600px">
+		<Border height="100%" width="100%" corner="15px" style="grid-column: 2; overflow-y: scroll; overflow-x: hidden; height-max: 600px">
 			{#await promise}
 				<h2> Loading vids</h2>
 			{:then videos}

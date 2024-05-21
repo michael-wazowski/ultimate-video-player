@@ -12,6 +12,7 @@
 
 	import ArcSlider from "./ArcSlider.svelte";
 	import CaptionWindow from "./CaptionWindow.svelte";
+	import TimeSlider from "./TimeSlider.svelte";
 
 	let videoElement;
 	let videoWrapper;
@@ -22,8 +23,9 @@
 	let paused = true;
 	let fullscreen = false;
 
-	let showControls = true;
-	let showControlsTimeout;
+	let controlsHovered = false;
+	let videoHovered = false;	
+	let videoHoveredTimeout;
 
 	let captionsState = "off" // can be off, basic or side
 
@@ -45,19 +47,19 @@
 
 	let allCaptionCues = [];
 
-	function handleMove(e) {
-		// Make the controls visible, but fade out after
-		// 2.5 seconds of inactivity
-		clearTimeout(showControlsTimeout);
-		showControlsTimeout = setTimeout(() => (showControls = false), 2500);
-		showControls = true;
+	async function onVideoHovered(e){
+		videoHovered = true;
+		clearTimeout(videoHoveredTimeout);
+		videoHoveredTimeout = setTimeout(() => {videoHovered = false;}, 3000);
+	}
 
-		if (!duration) return; // video not loaded yet
-		if (e.type !== 'touchmove' && !(e.buttons & 1)) return; // mouse not down
+	async function onControlsExit(e){
+		controlsHovered = false;
+		onVideoHovered();
+	}
 
-		const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-		const { left, right } = this.getBoundingClientRect();
-		$time = (duration * (clientX - left)) / (right - left);
+	async function onControlsEnter(e){
+		controlsHovered = true;
 	}
 
 	// we can't rely on the built-in click event, because it fires
@@ -175,15 +177,27 @@
 		}
 	}
 
+	async function onKeypress(e){
+		switch(e.code){
+			case("Space"):
+				togglePlayback();
+				e.preventDefault();
+				break;
+			case("KeyC"):
+				switchCaptions();
+				break;
+			
+		}
+	}
+
 </script>
+<svelte:window on:keydown={onKeypress}/>
 <div style="width: 100%; display: flex;">
 <div class="default-video">
-	<div bind:this={videoWrapper} bind:clientHeight={videoHeight} on:fullscreenchange={onFullscreenChange}> 
+	<div role="presentation" bind:this={videoWrapper} bind:clientHeight={videoHeight} on:fullscreenchange={onFullscreenChange} on:focus={(e) => {}} on:mouseenter={onVideoHovered}> 
 		<video
 		poster={thumbNailSource}
 		src={fileSource}
-		on:mousemove={handleMove}
-		on:touchmove|preventDefault={handleMove}
 		on:mousedown={handleMousedown}
 		on:mouseup={handleMouseup}
 		bind:currentTime={$time}
@@ -200,11 +214,12 @@
 	
 	
 
-		<div class="controls" style="opacity: {duration && showControls ? 1 : 0}">
+		<div role="presentation" class="controls" style="--non-caption-opacity: {duration && (controlsHovered || paused || videoHovered) ? 1 : 0}" on:focus={(e) => {}} on:mouseenter={onControlsEnter} on:mouseleave={onControlsExit}>
 			<div class="video-captions" style="{captionsState === "basic" ? "display: block;" : "display: none;"}">{customSubtitleText}</div>
-			<progress value={$time / duration || 0} />
 
-			<div class="info">
+			<TimeSlider bind:currentTimeSeconds={$time} duration={duration} onDragStart={(e) => {videoElement.pause();}} style="opacity: var(--non-caption-opacity); transition: opacity 1s;"/>
+
+			<div class="info" style="opacity: var(--non-caption-opacity); transition: opacity 1s;">
 				
 				<div class="play-pause">
 					<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
@@ -212,7 +227,7 @@
 					</button>
 				</div>
 
-				<div class="time">{formatToMins($time)}/{formatToMins(duration)}</div>\
+				<div class="time">{formatToMins($time)}/{formatToMins(duration)}</div>
 
 				<div class="fullscreen-toggle">
 					<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
@@ -255,7 +270,6 @@
 		position: absolute;
 		bottom: 0.5rem;
 		width: 100%;
-		transition: opacity 1s;
 	}
 
 	.info {

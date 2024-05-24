@@ -290,7 +290,7 @@
 		padding-left: 10px;
 		padding-right: 10px;
 		font-family: Barlow;
-		height: fit-contentc;
+		height: fit-content;
 		margin: auto;
 		width: fit-content;
 		font-size: xx-large;

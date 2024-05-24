@@ -16,7 +16,9 @@ Team Members:
 ## How to run this weird stack
 <code>cd web-app & npm install & npm run dev</code>
 
-<code>cd backend && flask run --port 8000</code>
+In another terminal
+<code>RUN THE THING TO ADD FFMPEG TO PATH (NEEDED FOR WHISPER)</code>
+<code>cd backend && flask run</code>
 
 
 ## Note for Jayden, how to expose the stack

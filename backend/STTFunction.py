@@ -24,6 +24,9 @@ def format_time(seconds):
         return f"{hours:02}:{minutes:02}:{secs:06.3f}"
 
 def STTFunction(path, id):
+
+    print("Opening: "+str(id)+", "+str(path))
+
     model = whisper.load_model("base")
     result = model.transcribe(path)
     #writer = get_writer("vtt", "static/video/")
@@ -64,6 +67,7 @@ def STTFunction(path, id):
 
 
 if __name__ == "__main__":
-    inputPath = """static/video/subtitles.mp4"""
+    print("File Not Found? FFMPEG NOT on PATH most likely")
+    inputPath = """static/video/1.mp4"""
     print("Running STT Function")
-    STTFunction(inputPath, 5)
+    STTFunction(inputPath, 1)

@@ -239,15 +239,31 @@ thread_event = threading.Event()
 def backgroundTask():
     while (True):
         # find all entries in db not processed
+        sqliteConnection = sqlite3.connect("sql.db")
+        cursor = sqliteConnection.cursor()
+        cursor.execute("SELECT * FROM files WHERE processed = 0")
+        entries = cursor.fetchall()
+
+        if len(entries) < 1:
+            break
         # process them
 
-        # add data to their json_data
+        for entry in entries:
+            print(entry)
 
-        # set processed to true
+            id = entry[0]
 
-        break
+            #STTFunction.STTFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
+
+            #Call this when ocr function made
+            #OCRFunction.OCRFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
+
+            #set processed to true
+            cursor.execute("UPDATE files SET processed = 1 WHERE id = ?",[entry[0]])
+            sqliteConnection.commit()
 
     thread_event.clear()
+    print("Background Thread Stop")
 
 
 # start the server

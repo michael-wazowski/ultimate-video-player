@@ -332,7 +332,7 @@
 		height: var(--height);
 		left: calc(50% - var(--width) / 2);
 		border-radius: calc(var(--width) / 2);
-		background-color: #ff3e00;
+		background-color: #0f62fe;
 		cursor: move;
 		color: white;
 	}
@@ -345,6 +345,7 @@
 		top: 50%;
 		transform: translate(-50%, 25%);
 		font-size: 15px;
+		font-family: Barlow;
 	}
 
 	.elipse-path {

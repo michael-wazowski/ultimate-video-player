@@ -11,6 +11,7 @@
 	import UploadErrorDialog from '../lib/components/UploadErrorDialog.svelte';
 
 	import PlusSymbol from "$lib/assets/plus-symbol.svg";
+    import { onMount } from 'svelte';
 
 	// Used to start preloading the list of videos the user has
 	let promise = queryVideos();
@@ -18,7 +19,7 @@
 	let form;
 	let dynamicVideo = null;
 	let blockUpload = false;
-
+	
 	let currentFile;
 	let deleteVideoDialog;
 	let uploadErrorDialog;

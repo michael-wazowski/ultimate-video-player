@@ -1,5 +1,6 @@
 <script>
     import { writable } from "svelte/store";
+	import { fade } from "svelte/transition";
 	import { formatToMins } from "$lib/core/formatting";
 	import PlayIcon from "$lib/assets/play-icon.svg";
 	import PauseIcon from "$lib/assets/pause-icon.svg";
@@ -214,13 +215,16 @@
 	
 	
 
-		<div role="presentation" class="controls" style="--non-caption-opacity: {duration && (controlsHovered || paused || videoHovered) ? 1 : 0}" on:focus={(e) => {}} on:mouseenter={onControlsEnter} on:mouseleave={onControlsExit}>
-			<div class="video-captions" style="{captionsState === "basic" ? "display: block;" : "display: none;"}">{customSubtitleText}</div>
+		<div role="presentation" class="controls" on:focus={(e) => {}} on:mouseenter={onControlsEnter} on:mouseleave={onControlsExit}>
+			{#if captionsState === "basic"}
+			<div transition:fade class="video-captions">{customSubtitleText}</div>
+			{/if}
 
-			<TimeSlider bind:currentTimeSeconds={$time} duration={duration} onDragStart={(e) => {videoElement.pause();}} style="opacity: var(--non-caption-opacity); transition: opacity 1s;"/>
 
-			<div class="info" style="opacity: var(--non-caption-opacity); transition: opacity 1s;">
-				
+			{#if (duration && (controlsHovered || paused || videoHovered))}
+			<TimeSlider bind:currentTimeSeconds={$time} duration={duration} onDragStart={(e) => {videoElement.pause();}}/>
+
+			<div class="info" transition:fade>
 				<div class="play-pause">
 					<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
 						<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video"/>
@@ -241,6 +245,8 @@
 					</button>
 				</div>
 			</div>
+
+			{/if}
 		</div>
 	</div>
 	
@@ -250,7 +256,7 @@
 </div>
 
 {#if captionsState == "side"}
-<div style="width: 25%; height: calc({videoHeight}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
+<div transition:fade style="width: 25%; height: calc({videoHeight}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
 	<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration}/>
 </div>
 {/if}
@@ -280,10 +286,15 @@
 
 	.video-captions{
 		color: #f4f4f4;
+		background-color: rgba(0, 0, 0, 0.7);
+		padding-left: 10px;
+		padding-right: 10px;
 		font-family: Barlow;
+		height: fit-contentc;
 		margin: auto;
 		width: fit-content;
 		font-size: xx-large;
+		border-radius: 8px;
 	}
 
 	.time {

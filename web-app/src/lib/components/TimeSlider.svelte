@@ -1,4 +1,6 @@
 <script>
+import { fade } from "svelte/transition";
+
 export let duration;
 export let currentTimeSeconds;
 
@@ -9,7 +11,7 @@ export let style;
 
 </script>
 
-<input on:mousedown={onDragStart} on:mouseup={onDragEnd} type="range" step="0.01" bind:value={currentTimeSeconds} min="0" max="{duration}" style="{style}"/>
+<input transition:fade on:mousedown={onDragStart} on:mouseup={onDragEnd} type="range" step="0.01" bind:value={currentTimeSeconds} min="0" max="{duration}" style="{style}"/>
 
 <style>
     input {

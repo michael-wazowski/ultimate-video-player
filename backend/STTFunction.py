@@ -23,6 +23,26 @@ def format_time(seconds):
         secs = seconds % 60
         return f"{hours:02}:{minutes:02}:{secs:06.3f}"
 
+Keyword_Data_Set = [
+    # Introduction
+    "welcome", "introduction", "begin", "start", "opening", "kickoff", "overview", "hey", "hi", "name",
+
+    # Transition 
+    "moving on", "next", "let's discuss", "now we will", "in the next section", "following that", "proceeding to", "shifting focus",     "additionally", "as well as", "furthermore", "thus", "hence", "in short", "to sum up", "also", "Subsequently", "moreover", "another      point", "in addition", "then again", "first", "firstly", "second", "seondly", "third", "thirdly", "forth", "fourthly", "fifth", "fifthly", "finally", "to elaborate",
+
+    # Key Points 
+    "important", "importantly", "key point", "remember", "note", "significant", "crucial", "essential", "fundamental", "highlight", "main     idea",
+
+    #compare/contrast
+    "similarly", "likewise", "comparison", "Complementary", "However", "in contrast", "yet", "nevertheless", "Conversely", "contrary", "other     hand", "Whereas", "Despite", "correlation",
+
+    # Examples 
+    "for example", "for instance", "such as", "case study", "consider", "take a look at", "illustration", "illustrate", "scenario", "exemplar", "just like", "supports", "demonstrated", "is observed", "Specifically", "exemplifies",
+
+    #Conclusion
+    "conclusion", "conclude", "summary", "end", "wrap-up", "finally", "closing", "final thoughts", "recap", "in conclusion", "bye", "see you later"
+]
+
 def STTFunction(path, id):
 
     print("Opening: "+str(id)+", "+str(path))
@@ -40,8 +60,8 @@ def STTFunction(path, id):
         isIP = any(char in ['!','?'] for char in segment['text'])
 
        
-        for word in ['Portuguese']:
-            if word in segment['text']:
+        for word in Keyword_Data_Set:
+            if word in segment['text'].lower():
                 isIP = True
 
         captionList.append(Caption(segment['start'],segment['end'],segment['text'],isIP))

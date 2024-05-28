@@ -29,6 +29,7 @@
 	let videoHoveredTimeout;
 
 	let captionsState = "off" // can be off, basic or side
+	let playbackRate = 1
 
 	export let fileSource = "";
 
@@ -162,6 +163,13 @@
 		}
 	}
 
+	async function switchPlaybackRate(e){
+		playbackRate += 0.25
+		if (playbackRate > 2){
+			playbackRate = 0.25
+		}
+	}
+
 	async function grabAllCaptions(event){
 		if(event){
 			let captions = [];
@@ -205,6 +213,7 @@
 		bind:duration
 		bind:paused
 		bind:this={videoElement}
+		bind:playbackRate={playbackRate}
 		crossorigin="anonymous"
 		id="video"
 		>
@@ -225,25 +234,34 @@
 			<TimeSlider bind:currentTimeSeconds={$time} duration={duration} onDragStart={(e) => {videoElement.pause();}}/>
 
 			<div class="info" transition:fade>
-				<div class="play-pause">
-					<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
-						<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video"/>
-					</button>
+				<div>
+					<div>
+						<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
+							<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video"/>
+						</button>
+					</div>
+	
+					<div class="text">{formatToMins($time)}/{formatToMins(duration)}</div>
+				</div>
+				
+				<div>
+					<div>
+						<button on:click={switchPlaybackRate} style="background-color: transparent; border-style: none;" class="text">
+							{playbackRate}x
+						</button>
+					</div>
+					<div>
+						<button on:click={switchCaptions} style="background-color: transparent; border-style: none;">
+							<img src="{captionsState == "off" ? CaptionsIcon : CaptionsActiveIcon}" alt="Click to activate captions"/>
+						</button>
+					</div>
+					<div>
+						<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
+							<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode"/>
+						</button>
+					</div>
 				</div>
 
-				<div class="time">{formatToMins($time)}/{formatToMins(duration)}</div>
-
-				<div class="fullscreen-toggle">
-					<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
-						<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode"/>
-					</button>
-				</div>
-
-				<div class="play-pause">
-					<button on:click={switchCaptions} style="background-color: transparent; border-style: none;">
-						<img src="{captionsState == "off" ? CaptionsIcon : CaptionsActiveIcon}" alt="Click to activate captions"/>
-					</button>
-				</div>
 			</div>
 
 			{/if}
@@ -282,6 +300,23 @@
 		display: flex;
 		width: 100%;
 		height: 3em;
+		justify-content: space-between;
+	}
+
+	.info .text {
+		color: #f4f4f4;
+		font-family: Barlow;
+		font-size: 18px;
+	}
+
+	.info > div {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.info > div > div {
+		margin-top: auto;
+		margin-bottom: auto;
 	}
 
 	.video-captions{
@@ -295,28 +330,7 @@
 		width: fit-content;
 		font-size: xx-large;
 		border-radius: 8px;
-	}
-
-	.time {
-		display: flexbox;
-		color: #f4f4f4;
-		font-family: Barlow;
-		margin-top: auto;
-		margin-bottom: auto;
-	}
-
-	.play-pause {
-		display: flexbox;
-		margin-top: auto;
-		margin-bottom: auto;
-	}
-
-	.fullscreen-toggle {
-		display: flexbox;
-		margin-top: auto;
-		margin-bottom: auto;
-		margin-left: auto;
-	}
+	}	
 
 	.default-video {
 		width: 70%;

@@ -237,14 +237,14 @@
 				<div>
 					<div>
 						<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
-							<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video"/>
+							<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video" style="vertical-align: middle;"/>
 						</button>
 					</div>
 	
 					<div class="text">{formatToMins($time)}/{formatToMins(duration)}</div>
 				</div>
 				
-				<div>
+				<div >
 					<div>
 						<button on:click={switchPlaybackRate} style="background-color: transparent; border-style: none;" class="text">
 							{playbackRate}x
@@ -252,12 +252,12 @@
 					</div>
 					<div>
 						<button on:click={switchCaptions} style="background-color: transparent; border-style: none;">
-							<img src="{captionsState == "off" ? CaptionsIcon : CaptionsActiveIcon}" alt="Click to activate captions"/>
+							<img src="{captionsState == "off" ? CaptionsIcon : CaptionsActiveIcon}" alt="Click to activate captions" style="vertical-align: middle;"/>
 						</button>
 					</div>
 					<div>
 						<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
-							<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode"/>
+							<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode" style="vertical-align: middle;"/>
 						</button>
 					</div>
 				</div>

@@ -13,6 +13,8 @@
 	import PlusSymbol from "$lib/assets/plus-symbol.svg";
     import { onMount } from 'svelte';
 
+	import {io} from "socket.io-client";
+
 	// Used to start preloading the list of videos the user has
 	let promise = queryVideos();
 	
@@ -25,6 +27,11 @@
 	let uploadErrorDialog;
 	const videoShowing = writable(false);
 	const BACKEND_URL = "http://127.0.0.1:8000"; //"https://carbonlaptop.tail0a458.ts.net:10000"
+
+	var socket = io(BACKEND_URL);
+	socket.on('list-change', (json) => {
+		promise = queryVideos();
+	})
 
 	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
 	$: if(currentFile && blockUpload == false){
@@ -79,8 +86,8 @@
 				let subUrl = await response.text();
 				let absoluteUrl = BACKEND_URL + subUrl;
 				
-				dynamicVideo = absoluteUrl;
-				videoShowing.set(true);
+				//dynamicVideo = absoluteUrl;
+				//videoShowing.set(true);
 			}
 			else{
 				showUploadError();
@@ -130,8 +137,8 @@
 				<h2> Loading vids</h2>
 			{:then videos}
 				<div class="uploaded-list-container" style="display: flex; flex-wrap: wrap;">
-					{#each videos as { filename, id }, i}
-						<VideoThumbnail clickBinding={() => onSelectVideo(id)} deleteHandler={() => onDeleteVideo(id, filename)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} id={id}/>
+					{#each videos as { filename, id, processed }, i}
+						<VideoThumbnail clickBinding={() => onSelectVideo(id)} deleteHandler={() => onDeleteVideo(id, filename)} thumbNailUrl="{BACKEND_URL}/uploads/{id}/thumb" title={filename} id={id} status={processed}/>
 					{/each}
 				</div>
 			{/await}

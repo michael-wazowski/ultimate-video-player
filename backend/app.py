@@ -10,11 +10,13 @@ from flask import (
     after_this_request,
 )
 from flask_cors import CORS
+from flask_socketio import SocketIO
 from werkzeug.utils import secure_filename
 import threading
 import json
 import sqlite3
 import imageio.v3 as ffmpeg
+
 
 # Import our processing functions
 import OCRFunction
@@ -26,6 +28,9 @@ ALLOWED_EXTENSIONS = {"mp4", "avi", "webm"}
 app = Flask(__name__, static_folder="static")
 app.config["UPLOAD_FOLDER"] = os.path.abspath(UPLOAD_FOLDER)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 CORS(app)
 
 # Make sure the db exists
@@ -113,6 +118,8 @@ def root():
 
             # return redirect(url_for('download_file', name=filename))
 
+            socketio.emit('list-change',json_list_of_videos())
+
             #return redirect(url_for("server_url", id=str(cursor.lastrowid)))
             return url_for("download_file",id=str(cursor.lastrowid))
 
@@ -126,9 +133,9 @@ def static_file(path):
 
 
 # serve the video player page
-@app.route("/watch")
-def serve_player_page():
-    return app.send_static_file("player.html")
+# @app.route("/watch")
+# def serve_player_page():
+#     return app.send_static_file("player.html")
 
 
 # serve the videos
@@ -166,6 +173,9 @@ def delete_file(id):
         cursor = sqliteConnection.cursor()
         cursor.execute("DELETE FROM files WHERE id = ?", [id])
         sqliteConnection.commit()
+
+        socketio.emit('list-change',json_list_of_videos())
+
         return "Succes", 200
     except:
         return "File already deleted", 204
@@ -225,7 +235,7 @@ def json_list_of_videos():
     # Convert entries to a list of dictionaries
     entry_list = []
     for entry in entries:
-        entry_dict = {"id": entry[0], "filename": entry[1], "processed": bool(entry[2])}
+        entry_dict = {"id": entry[0], "filename": entry[1], "processed": entry[3]}
         entry_list.append(entry_dict)
 
     return entry_list
@@ -253,7 +263,7 @@ def backgroundTask():
 
             id = entry[0]
 
-            #STTFunction.STTFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
+            STTFunction.STTFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
 
             #Call this when ocr function made
             #OCRFunction.OCRFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
@@ -262,6 +272,8 @@ def backgroundTask():
             cursor.execute("UPDATE files SET processed = 1 WHERE id = ?",[entry[0]])
             sqliteConnection.commit()
 
+            socketio.emit('list-change',json_list_of_videos())
+
     thread_event.clear()
     print("Background Thread Stop")
 
@@ -269,4 +281,5 @@ def backgroundTask():
 # start the server
 if __name__ == "__main__":
     app.debug = True
-    app.run()
+    socketio.run(app, port=8000)
+    #app.run()

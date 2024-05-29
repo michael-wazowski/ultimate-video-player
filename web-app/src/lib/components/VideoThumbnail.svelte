@@ -8,6 +8,7 @@
     export let thumbNailUrl = "";
     export let title = "";
     export let id = 0;
+    export let status = 1;
     let lengthMinutes = 0.0;
     let duration = 0.0
     export let clickBinding;
@@ -34,7 +35,11 @@
         </div>
 
         <h3>
+            {#if status === 0}
+            Processing
+            {/if}
             {title}
+           
         </h3>
     </Grid>
 </button>

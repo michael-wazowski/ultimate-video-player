@@ -17,7 +17,8 @@ Team Members:
 <code>cd web-app & npm install & npm run dev</code>
 
 In another terminal
-<code>RUN THE THING TO ADD FFMPEG TO PATH (NEEDED FOR WHISPER)</code>
+<code>cd backend/BackendEnv</code>
+<code>run install.ps1 (this makes a python venv, pip installs from requirements.txt and adds ffmpeg to the current shells PATH)</code>
 <code>cd backend && flask run</code>
 
 

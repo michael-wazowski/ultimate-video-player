@@ -14,9 +14,9 @@ font = cv2.FONT_HERSHEY_PLAIN
 #f = open(file_name+".txt", "a")
 
 
-def OCRFunction(inputPath, outputPath):
-    cap =cv2.VideoCapture(r'C:\Users\Cheyu\Documents\Compx241\Project\borrowed_223.mp4')# file path of video
-    f = open("test.txt", "a")
+def OCRFunction(filePath, id):
+    cap =cv2.VideoCapture(filePath)# file path of video
+    f = open("static/video/"+str(id)+"OCR.vtt", "a")
 
     if not cap.isOpened():
         cap =cv2.VideoCapture(0)
@@ -24,10 +24,10 @@ def OCRFunction(inputPath, outputPath):
         raise IOError("Cannot open video")
 
     previous_line = '' # initialising previous line tracker
-    counter= 0;
+    counter= 0
     while True:
         ret,frame=cap.read()
-        counter +=1;
+        counter +=1
         if ((counter%30)==0): # reads every 30 frames
             
             imgchar = pytesseract.image_to_string(frame)# reads words from image
@@ -37,6 +37,7 @@ def OCRFunction(inputPath, outputPath):
                 previous_line = imgchar #previous lines value become imgchar value
                 print(imgchar) # prints value to command line so i can see while debugging
                 f.write(imgchar)# writes line to text
+                breakpoint()
             
             font = cv2.FONT_HERSHEY_SIMPLEX
             
@@ -52,7 +53,6 @@ def OCRFunction(inputPath, outputPath):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    inputPath = ""
-    outputPath = ""
+    inputPath = """static/video/borrowed_223.mp4"""
     print("Running OCR Function")
-    OCRFunction(inputPath,outputPath)
+    OCRFunction(inputPath,1)

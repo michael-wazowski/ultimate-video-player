@@ -19,7 +19,7 @@ import imageio.v3 as ffmpeg
 
 
 # Import our processing functions
-import OCRFunction
+# import OCRFunction
 import STTFunction
 
 UPLOAD_FOLDER = "static/video"

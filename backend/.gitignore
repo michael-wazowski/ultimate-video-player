@@ -6,3 +6,4 @@ BackendEnv/pyvenv.cfg
 BackendEnv/Library/
 BackendEnv/share
 *.jpg
+*.vtt

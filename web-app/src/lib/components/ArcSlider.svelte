@@ -73,14 +73,14 @@
 		//look at the oldest / newest time, is it still within timescale
 		//if not, remove it
 		if (visibleSliderEvents.length > 0) {
-			while (visibleSliderEvents[0].time < timeV - $currentTimeScale) {
+			while (visibleSliderEvents[0].time < timeV - ($currentTimeScale*1.05)) {
 				console.log("late");
 				visibleSliderEvents = visibleSliderEvents.slice(1);
 				sliderLI++;
 				console.log("sliderLI", sliderLI);
 			}
 
-			while (visibleSliderEvents[visibleSliderEvents.length-1].time > timeV + $currentTimeScale + $currentTimeScale) {
+			while (visibleSliderEvents[visibleSliderEvents.length-1].time > timeV + ($currentTimeScale*2)) {
 				console.log("early");
 				visibleSliderEvents = visibleSliderEvents.slice(0,-2);
 				sliderRI--;
@@ -269,6 +269,7 @@
 		//sets the target to tween() towards
 		$currentTimeScale = 240;
 	}
+
 </script>
 
 <div class="container" >
@@ -296,10 +297,15 @@
 	</div>
 
 	{#each visibleSliderEvents as chip}
+
+		{#if Math.abs(((chip.time - time) / $currentTimeScale) * endAngle) < 37}
+
 		<div
 			class="rotator"
-			style="rotate: {((chip.time - time) / $currentTimeScale) *
-				endAngle}deg ; border-color:{trackColor};"
+			style="rotate: {((chip.time - time) / $currentTimeScale) * endAngle}deg; 
+					border-color:{trackColor};
+					
+					"
 		>
 			<div
 				class="box"
@@ -312,6 +318,8 @@
 				</div>
 			</div>
 		</div>
+		{/if}
+
 	{/each}
 </div>
 
@@ -375,6 +383,7 @@
 		position: absolute;
 		aspect-ratio: 1 / 1;
 		pointer-events: none;
+
 	}
 
 	.container {

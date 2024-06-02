@@ -181,9 +181,13 @@ def delete_file(id):
         return "File already deleted", 204
 
     
-@app.route("/uploads/<id>/vtt")
+@app.route("/uploads/<id>/stt")
 def download_file_vtt(id):
     return send_from_directory(app.config["UPLOAD_FOLDER"], id + ".vtt")
+
+@app.route("/uploads/<id>/ocr")
+def download_file_vtt(id):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], id + "OCR.vtt")
 
 @app.route("/uploads/<id>/thumb")
 def download_file_thumb(id):

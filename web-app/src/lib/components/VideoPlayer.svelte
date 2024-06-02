@@ -34,11 +34,11 @@
 	export let fileSource = "";
 
     let thumbNailSource = fileSource+"/thumb";
-	let subSource = fileSource+"/vtt";
+	let subSource = fileSource+"/stt";
 
 	//fix when video player opening after new upload with previous id's thumbnail as poster? even though the video itself was correct
 	$: thumbNailSource = fileSource+"/thumb";
-	$: subSource = fileSource+"/vtt";
+	$: subSource = fileSource+"/stt";
 
 	let captionTrack;
 	let customSubtitleText = "";

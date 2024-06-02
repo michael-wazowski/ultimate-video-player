@@ -182,11 +182,11 @@ def delete_file(id):
 
     
 @app.route("/uploads/<id>/stt")
-def download_file_vtt(id):
+def download_file_stt(id):
     return send_from_directory(app.config["UPLOAD_FOLDER"], id + ".vtt")
 
 @app.route("/uploads/<id>/ocr")
-def download_file_vtt(id):
+def download_file_ocr(id):
     return send_from_directory(app.config["UPLOAD_FOLDER"], id + "OCR.vtt")
 
 @app.route("/uploads/<id>/thumb")

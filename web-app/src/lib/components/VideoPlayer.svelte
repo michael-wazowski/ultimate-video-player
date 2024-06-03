@@ -36,13 +36,15 @@
 
     let thumbNailSource = fileSource+"/thumb";
 	let subSource = fileSource+"/stt";
+	let ocrSource = fileSource+"/ocr"
 
 	//fix when video player opening after new upload with previous id's thumbnail as poster? even though the video itself was correct
 	$: thumbNailSource = fileSource+"/thumb";
 	$: subSource = fileSource+"/stt";
+	$: ocrSource = fileSource+"/ocr"
 
-	let captionTrack;
 	let customSubtitleText = "";
+	let customOCRText = "";
 	let currentCueStartTime;
 	let videoHeight;
 
@@ -50,6 +52,7 @@
 	let lastMouseDown;
 
 	let allCaptionCues = [];
+	let allOCRCues = [];
 
 
 	async function onVideoError(e){
@@ -99,6 +102,13 @@
 		currentCueStartTime = event?.target?.track?.activeCues[0]?.startTime;
 		if(cueText){
 			customSubtitleText = cueText;
+		}
+	}
+
+	function onNewOCR(event){
+		let cueText = event?.target?.track?.activeCues[0]?.text;
+		if(cueText){
+			customOCRText = cueText;
 		}
 	}
 
@@ -188,9 +198,26 @@
 						content: cue.text,
 						start: cue.startTime,
 						end: cue.endTime,
+						id: cue.id
 					});
 			}
 			allCaptionCues = captions;
+		}
+	}
+
+	async function grabAllOCR(event){
+		if(event){
+			let captions = [];
+			let cues = event.target.track.cues;
+			for (let index = 0; index < cues.length; index++) {
+				let cue = cues[index];
+				captions.push({
+						content: cue.text,
+						start: cue.startTime,
+						end: cue.endTime,
+					});
+			}
+			allOCRCues = captions;
 		}
 	}
 
@@ -229,7 +256,9 @@
 		id="video"
 		>
 		<track kind="captions" id="dummy"/>
-		<track kind="metadata" id="captionTrack" default src={subSource} bind:this={captionTrack} on:cuechange={onNewCue} on:load={grabAllCaptions}/>
+		<track kind="metadata" id="ocrTrack" default src={ocrSource} on:load={grabAllOCR} on:cuechange={onNewOCR}/>
+		<track kind="metadata" id="captionTrack" default src={subSource} on:cuechange={onNewCue} on:load={grabAllCaptions}/>
+
 	
 		</video>
 	
@@ -279,13 +308,19 @@
 	</div>
 	
 	
-	<ArcSlider bind:time={$time} captionTrack={captionTrack} duration={duration}/>
+	<ArcSlider bind:time={$time} allCaptionCues={allCaptionCues} duration={duration}/>
 </div>
 
 {#if captionsState == "side"}
-<div transition:fade style="width: 25%; height: calc({videoHeight}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
-	<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration} currentCueStartTime={currentCueStartTime}/>
+<div style="width: 25%;">
+	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
+		<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration} currentCueStartTime={currentCueStartTime}/>
+	</div>
+	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; margin-top: 1rem; border-radius: 8px">
+		<pre>{customOCRText}</pre>
+	</div>
 </div>
+
 {/if}
 
 

@@ -9,7 +9,7 @@
 	let thumbHeight = 25;
 
 	export let time;
-	export let captionTrack;
+	export let allCaptionCues;
 	export let duration;
 
 	//all of the events from the captions marked with "IP" (interest point)
@@ -48,13 +48,13 @@
 	//When time changes, figure out the state of our chips
 	$: handleTime(time);
 
-	//Force it to change when page loads (this relies on captionTrack loading fast)
-	setTimeout(() => {
-		sliderEvents = []
-		handleTime(time);
-	}, 100);
+	$: processCaptionTrack(allCaptionCues, duration)
 
-	let processed = false;
+	//Force it to change when page loads (this relies on captionTrack loading fast)
+	// setTimeout(() => {
+	// 	sliderEvents = []
+	// 	handleTime(time);
+	// }, 100);
 
 	let sliderLI = 0; //slider event search index
 	let sliderRI = 0;
@@ -63,12 +63,12 @@
 
 	async function handleTime(timeV) {
 		//pull all of the cues into an array (the cue list isn't actually an array)
-		if (sliderEvents.length == 0 && !processed) {
-			processCaptionTrack();
-			console.log("Process caption track");
-		} else {
-			processed = true;
-		}
+		// if (sliderEvents.length == 0 && !processed) {
+		// 	processCaptionTrack();
+		// 	console.log("Process caption track");
+		// } else {
+		// 	processed = true;
+		// }
 
 		//look at the oldest / newest time, is it still within timescale
 		//if not, remove it
@@ -231,29 +231,54 @@
 	}
 
 	//get each of the cues from captionTrack with id = "IP"
-	function processCaptionTrack() {
-		sliderEvents = [];
-		if (typeof captionTrack != "undefined") {
-			let cues = captionTrack.track.cues;
+	function processCaptionTrack(captionCues, duration) {
+		// sliderEvents = [];
+		// if (typeof captionTrack != "undefined") {
+		// 	let cues = captionTrack.track.cues;
 
-			for (let index = 0; index < cues.length; index++) {
-				const cue = cues[index];
+		// 	for (let index = 0; index < cues.length; index++) {
+		// 		const cue = cues[index];
+
+		// 		if (cue.id == "IP") {
+		// 			sliderEvents.push({
+		// 				content: cue.text,
+		// 				time: cue.startTime,
+		// 			});
+		// 		}
+		// 	}
+
+		// 	if (sliderEvents.length != 0){
+		// 		sliderEvents.push({
+		// 				content: "End of Content",
+		// 				time: duration,
+		// 		});
+		// 	}	
+		// }		
+
+		sliderEvents = [];
+
+		for (let index = 0; index < captionCues.length; index++) {
+				const cue = captionCues[index];
 
 				if (cue.id == "IP") {
 					sliderEvents.push({
-						content: cue.text,
-						time: cue.startTime,
+						content: cue.content,
+						time: cue.start,
 					});
 				}
-			}
+		}
 
-			if (sliderEvents.length != 0){
+		if (sliderEvents.length != 0){
 				sliderEvents.push({
 						content: "End of Content",
 						time: duration,
 				});
-			}	
-		}
+			}
+
+		console.log("Porcessing", sliderEvents)
+
+		handleTime(time)
+
 	}
 
 	//delta between current timestamp and most forward point on the graph

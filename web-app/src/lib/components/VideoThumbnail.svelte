@@ -37,9 +37,12 @@
             <button on:click|stopPropagation={deleteHandler} class="delete-button">
                 <img src={TrashSymbol} alt="Delete Video" class="delete-icon">
             </button>
-            <img src={thumbNailUrl} alt="thumbnail" class="thumbnail">
+            
             {#if status === 0}
+                <img src={thumbNailUrl} alt="thumbnail" class="thumbnail dark">
                 <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            {:else}
+                <img src={thumbNailUrl} alt="thumbnail" class="thumbnail">
             {/if}
         </div>
 
@@ -68,6 +71,10 @@
         width: calc(100% - 32px);
         height: calc(100% - 15px);
         border-radius: 15px;
+    }
+
+    .dark {
+        filter: brightness(50%)
     }
 
     .delete-button {

@@ -18,7 +18,7 @@ import sqlite3
 import ffmpeg
 
 # Import our processing functions
-# import OCRFunction
+import OCRFunction
 import STTFunction
 
 UPLOAD_FOLDER = "static/video"
@@ -107,16 +107,6 @@ def root():
             #newConversionThread.start()
             newSTTThread = threading.Thread(target=lambda: generate_stt_task(os.path.join(app.config["UPLOAD_FOLDER"], tempName), cursor.lastrowid))
             newSTTThread.start()
-
-            #if thread_event.is_set() == False:
-            #    try:
-            #        thread_event.set()
-            #        thread = threading.Thread(target=backgroundTask)
-            #        thread.start()
-            #    except Exception as error:
-            #        print("Error starting processing task")
-
-            # return redirect(url_for('download_file', name=filename))
             
             sqliteConnection.close()
             socketio.emit('list-change', json_list_of_videos())
@@ -178,40 +168,6 @@ def download_file_ocr(id):
 def download_file_thumb(id):
     return send_from_directory(app.config["UPLOAD_FOLDER"], id + ".jpg")
 
-# get the video metadata
-# @app.route("/uploads/<id>/data")
-# def download_file_data(id):
-#     sqliteConnection = sqlite3.connect("sql.db")
-#     cursor = sqliteConnection.cursor()
-#     cursor.execute("SELECT * FROM files WHERE id = ?", [id])
-#     entries = cursor.fetchall()
-#     entry = entries[0]
-
-#     entry_dict = {
-#         "id": entry[0],
-#         "filename": entry[1],
-#         "processed": bool(entry[2]),
-#         "json_data": json.loads(entry[3]) if entry[3] else None,
-#     }
-
-#     return entry_dict
-
-
-# Serve video as url
-# @app.route("/uploads/url/<id>")
-# def server_url(id):
-#     sqliteConnection = sqlite3.connect("sql.db")
-#     cursor = sqliteConnection.cursor()
-#     print(id)
-#     cursor.execute("SELECT filename FROM files WHERE id = ?", [id])
-#     result = cursor.fetchone()
-
-#     if result:
-#         filename = result[0]
-#         return url_for("static", filename=("video/" + str(id) + filename))
-#     else:
-#         return "not found", 404
-
 # serve list of videos for the index page
 @app.route("/list")
 def json_list_of_videos():
@@ -230,57 +186,23 @@ def json_list_of_videos():
 
     return entry_list
 
-
-# Handle the background processing
-# https://tiagohorta1995.medium.com/python-flask-api-background-task-96bf1120a855
-thread_event = threading.Event()
-
 #def convert_video_task(current_path, final_path, video_id):
 #    autoconvert_video(current_path, final_path)
 #    generate_stt_task(final_path, video_id)
 
 def generate_stt_task(video_path, video_id):
-
+    
     STTFunction.STTFunction(video_path, video_id, FFMPEG_PATH)
+
+    #These tasks eat up 100% cpu already, no point running in parallel (also if one finished the video state would be set to processed when the other wasn't finished)
+    OCRFunction.OCRFunction(video_path, id)
+
     sqliteConnection = sqlite3.connect(SQL_PATH)
     cursor = sqliteConnection.cursor()
     cursor.execute("UPDATE files SET processed = 1 WHERE id = ?",[video_id])
     sqliteConnection.commit()
     sqliteConnection.close()
     socketio.emit('list-change', json_list_of_videos())
-
-def backgroundTask():
-    while (True):
-        # find all entries in db not processed
-        sqliteConnection = sqlite3.connect(SQL_PATH)
-        cursor = sqliteConnection.cursor()
-        cursor.execute("SELECT * FROM files WHERE processed = 0")
-        entries = cursor.fetchall()
-
-        if len(entries) < 1:
-            break
-        # process them
-
-        for entry in entries:
-            print(entry)
-
-            id = entry[0]
-
-            STTFunction.STTFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
-
-            #Call this when ocr function made
-            #OCRFunction.OCRFunction(os.path.join(app.config["UPLOAD_FOLDER"],str(id) + get_extension(id)), id)
-
-            #set processed to true
-            cursor.execute("UPDATE files SET processed = 1 WHERE id = ?",[entry[0]])
-            sqliteConnection.commit()
-            sqliteConnection.close()
-
-            socketio.emit('list-change',json_list_of_videos())
-
-    thread_event.clear()
-    print("Background Thread Stop")
-
 
 # start the server
 if __name__ == "__main__":

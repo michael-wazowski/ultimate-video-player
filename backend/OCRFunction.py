@@ -28,6 +28,9 @@ def process_frame(frame, index, results):
     results[index] = imgchar
 
 def OCRFunction(filePath, id):
+
+    print("OCR Running")
+
     #Open the video with the given file path
     cap =cv2.VideoCapture(filePath)
 

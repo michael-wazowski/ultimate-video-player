@@ -75,7 +75,7 @@
         right: 3rem;
         top: .9rem;
         display: none;
-        background-color: transparent;
+        background-color: #262626;
         border-style: none;
         z-index: 100;
         border-radius: 8px;
@@ -83,7 +83,7 @@
     }
 
     .delete-button:hover{
-        background-color: #60606083;
+        background-color: #606060;
         transition: background-color 0.3s;
     }
 

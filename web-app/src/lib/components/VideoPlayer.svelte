@@ -43,6 +43,7 @@
 
 	let captionTrack;
 	let customSubtitleText = "";
+	let currentCueStartTime;
 	let videoHeight;
 
 	// Used to track time of last mouse down event
@@ -95,6 +96,7 @@
 	// We cannot style the track element properly so we replace it with a regular div
 	function onNewCue(event){
 		let cueText = event?.target?.track?.activeCues[0]?.text;
+		currentCueStartTime = event?.target?.track?.activeCues[0]?.startTime;
 		if(cueText){
 			customSubtitleText = cueText;
 		}
@@ -282,7 +284,7 @@
 
 {#if captionsState == "side"}
 <div transition:fade style="width: 25%; height: calc({videoHeight}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
-	<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration}/>
+	<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration} currentCueStartTime={currentCueStartTime}/>
 </div>
 {/if}
 

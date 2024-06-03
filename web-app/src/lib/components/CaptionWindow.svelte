@@ -2,6 +2,7 @@
     export let captions = [];
     export let currentTimeSeconds;
     export let maxTimeSeconds = 0;
+    export let currentCueStartTime; // Binding to the cue currently shown by the video player
 
     let container;
     let wait = false;
@@ -16,14 +17,22 @@
     }
 
 
+    async function getTargetOffset(startTime){
+        if(startTime){
+            return document.getElementById(startTime)?.offsetTop;
+        }
+
+        return 0;
+    }
+
     async function scrollToTarget(){
-        await container?.scrollTo({top: container.scrollHeight*(currentTimeSeconds/maxTimeSeconds)-30, behavior: 'smooth'}); // -30 px for a slight delay since the user can read the top text already
+        await container?.scrollTo({top:  (await getTargetOffset(currentCueStartTime))-(container.clientHeight/2), behavior: 'smooth'}); // - containerheight / 2 to try and always center current caption
     }
 </script>
 
 <div bind:this={container} class="hidden-scrollbar" style="width: 100%; height: 100%; overflow-y: scroll;">
 {#each captions as cue, i}
-<a href="" on:click={() => { currentTimeSeconds = cue.start}}><span id="{i}" class="inactive-cue" style="{(currentTimeSeconds >= cue.start && currentTimeSeconds < cue.end) ? "color: #f4f4f4" : "text-decoration: none;"}">{cue.content} </span></a>
+<a href="" on:click={() => { currentTimeSeconds = cue.start}}><span id="{cue.start}" class="inactive-cue" style="{(currentTimeSeconds >= cue.start && currentTimeSeconds < cue.end) ? "color: #f4f4f4" : "text-decoration: none;"}">{cue.content} </span></a>
 {/each}
 </div>
 

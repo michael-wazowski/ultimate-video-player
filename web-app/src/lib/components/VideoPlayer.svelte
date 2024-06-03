@@ -1,6 +1,7 @@
 <script>
     import { writable } from "svelte/store";
 	import { fade } from "svelte/transition";
+	import { onMount } from 'svelte';
 	import { formatToMins } from "$lib/core/formatting";
 	import PlayIcon from "$lib/assets/play-icon.svg";
 	import PauseIcon from "$lib/assets/pause-icon.svg";
@@ -48,6 +49,11 @@
 	let lastMouseDown;
 
 	let allCaptionCues = [];
+
+
+	async function onVideoError(e){
+		console.log("rbuhg");
+	}
 
 	async function onVideoHovered(e){
 		videoHovered = true;
@@ -195,7 +201,9 @@
 			case("KeyC"):
 				switchCaptions();
 				break;
-			
+			case("KeyF"):
+				toggleFullscreen();
+				break;
 		}
 	}
 
@@ -209,6 +217,7 @@
 		src={fileSource}
 		on:mousedown={handleMousedown}
 		on:mouseup={handleMouseup}
+		on:error={onVideoError}
 		bind:currentTime={$time}
 		bind:duration
 		bind:paused
@@ -223,7 +232,6 @@
 		</video>
 	
 	
-
 		<div role="presentation" class="controls" on:focus={(e) => {}} on:mouseenter={onControlsEnter} on:mouseleave={onControlsExit}>
 			{#if captionsState === "basic"}
 			<div transition:fade class="video-captions">{customSubtitleText}</div>
@@ -268,7 +276,6 @@
 		</div>
 	</div>
 	
-
 	
 	<ArcSlider bind:time={$time} captionTrack={captionTrack} duration={duration}/>
 </div>
@@ -362,5 +369,7 @@
 
 	video {
 		width: 100%;
+		vertical-align: center;
+  text-align: center;
 	}
 </style>

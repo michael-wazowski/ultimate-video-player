@@ -13,7 +13,7 @@
 	import PlusSymbol from "$lib/assets/plus-symbol.svg";
     import { onMount } from 'svelte';
 
-	import {io} from "socket.io-client";
+	import { io } from "socket.io-client";
 
 	// Used to start preloading the list of videos the user has
 	let promise = queryVideos();
@@ -29,18 +29,13 @@
 	const BACKEND_URL = "http://127.0.0.1:8000"; //"https://carbonlaptop.tail0a458.ts.net:10000"
 
 	var socket = io(BACKEND_URL);
-	socket.on('list-change', (json) => {
+	socket.on('list-change', async (json) => {
 		promise = queryVideos();
 	})
 
 	// This if statement is run each time the currentfile variable is changed (as a result of the $: )
 	$: if(currentFile && blockUpload == false){
 		form.requestSubmit();
-		if(dynamicVideo != null){
-			videoShowing.set(true);
-		}
-		
-		//form.requestSubmit();
 	}
 
 	// Querys the python server from the client side, returns the list of videos the client has
@@ -80,18 +75,18 @@
 			let response = await fetch(BACKEND_URL + "/", {
 				method: "POST",
       			body: formData,
-				redirect: 'follow'
+//				redirect: 'follow'
 			});
 			if(response.ok){
-				let subUrl = await response.text();
-				let absoluteUrl = BACKEND_URL + subUrl;
+				//let subUrl = await response.text();
+				//let absoluteUrl = BACKEND_URL + subUrl;
 				
 				//dynamicVideo = absoluteUrl;
 				//videoShowing.set(true);
+				console.log("JHfeufb");
 			}
 			else{
 				showUploadError();
-
 			}
 		}
 		catch{
@@ -100,6 +95,7 @@
 
 		currentFile = null;
 		blockUpload = false;
+		form.reset();
 
 		// Reload videos after uploading one
 		promise = queryVideos();

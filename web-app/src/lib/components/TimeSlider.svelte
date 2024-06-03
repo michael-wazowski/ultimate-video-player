@@ -23,6 +23,7 @@ export let style;
         margin: 0px;
         background: #6f6f6f;
         outline: none;
+        cursor: pointer;
     }
 
     input::-webkit-slider-thumb {

@@ -1,4 +1,4 @@
-import os
+import os, sys
 from flask import (
     Flask,
     flash,
@@ -15,8 +15,7 @@ from werkzeug.utils import secure_filename
 import threading
 import json
 import sqlite3
-import imageio.v3 as ffmpeg
-
+import ffmpeg
 
 # Import our processing functions
 # import OCRFunction
@@ -24,6 +23,8 @@ import STTFunction
 
 UPLOAD_FOLDER = "static/video"
 ALLOWED_EXTENSIONS = {"mp4", "avi", "webm"}
+FFMPEG_PATH = os.path.abspath("BackendEnv/ffmpeg/bin/ffmpeg.exe")
+SQL_PATH = os.path.abspath("sql.db")
 
 app = Flask(__name__, static_folder="static")
 app.config["UPLOAD_FOLDER"] = os.path.abspath(UPLOAD_FOLDER)
@@ -34,7 +35,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
 
 # Make sure the db exists
-sqliteConnection = sqlite3.connect("sql.db")
+sqliteConnection = sqlite3.connect(SQL_PATH)
 cursor = sqliteConnection.cursor()
 cursor.execute(
     """CREATE TABLE IF NOT EXISTS files
@@ -43,33 +44,26 @@ cursor.execute(
 sqliteConnection.commit()
 sqliteConnection.close()
 
-# part to handle the file uploads
-
-# file upload bit
-
-# call captioning funciton in a new thread
-
-# call ocr'ing function in a new thread
-
-# use sqlite database to store response from the functions once done
-
-
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def autogenerate_thumbnail(video_id):
-    extension = get_extension(video_id)
-    if extension != "":
-        filename = os.path.join(app.config["UPLOAD_FOLDER"], str(video_id)) + extension
-        for frame_count, first_frame in enumerate(ffmpeg.imiter(filename)):
-            ffmpeg.imwrite(os.path.join(app.config["UPLOAD_FOLDER"], str(video_id))+".jpg", first_frame)
-            break
-        
+def autogenerate_thumbnail(video_path, thumbnail_id):
+    if os.path.exists(video_path):
+        outputFilename = os.path.join(app.config["UPLOAD_FOLDER"], str(thumbnail_id))+".jpg"
+        ffmpeg.input(video_path, ss="00:00:00").output(outputFilename, vframes=1).run(quiet=False, cmd=FFMPEG_PATH, overwrite_output=True)
+
+# converts any video in the DB to webm format for standardization reasons
+def autoconvert_video(current_path, final_path):
+    ffmpeg.input(current_path).output(final_path, vcodec="libvpx", acodec="libvorbis").run(quiet=False, cmd=FFMPEG_PATH, overwrite_output=True)
+    os.remove(current_path)
+
+
 def get_extension(video_id):
-    sqliteConnection = sqlite3.connect("sql.db")
+    sqliteConnection = sqlite3.connect(SQL_PATH)
     cursor = sqliteConnection.cursor()
     cursor.execute("SELECT extension FROM files WHERE id = ?", [video_id])
     result = cursor.fetchone()
+    sqliteConnection.close()
 
     if result:
         filename = result[0]
@@ -93,35 +87,42 @@ def root():
             flash("No selected file")
             return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            extension = "." + filename.split(".")[-1]
-            sqliteConnection = sqlite3.connect("sql.db")
+            currentFilename = secure_filename(file.filename)
+            currentExtension = "." + currentFilename.split(".")[-1]
+            sqliteConnection = sqlite3.connect(SQL_PATH)
             cursor = sqliteConnection.cursor()
-            file_info = (filename, extension, False, None)
+            file_info = (currentFilename, currentExtension, False, None)
             cursor.execute(
                 "INSERT INTO files (filename, extension, processed, processed_data) VALUES (?, ?, ?, ?)",
                 file_info,
             )
             sqliteConnection.commit()
 
-            newName = str(cursor.lastrowid) + extension
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], newName))
-            autogenerate_thumbnail(cursor.lastrowid)
+            tempName = str(cursor.lastrowid) + currentExtension
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], tempName))
+            autogenerate_thumbnail(os.path.join(app.config["UPLOAD_FOLDER"], tempName), cursor.lastrowid) # create the thumbnail before starting the conversion/processing of the video since that can take time
+            
+            #Spin off a new thread so multiple videos can be converted at the same time
+            #newConversionThread = threading.Thread(target=lambda: convert_video_task(os.path.join(app.config["UPLOAD_FOLDER"], tempName), os.path.join(app.config["UPLOAD_FOLDER"], finalName), cursor.lastrowid))
+            #newConversionThread.start()
+            newSTTThread = threading.Thread(target=lambda: generate_stt_task(os.path.join(app.config["UPLOAD_FOLDER"], tempName), cursor.lastrowid))
+            newSTTThread.start()
 
-            if thread_event.is_set() == False:
-                try:
-                    thread_event.set()
-                    thread = threading.Thread(target=backgroundTask)
-                    thread.start()
-                except Exception as error:
-                    print("Error starting processing task")
+            #if thread_event.is_set() == False:
+            #    try:
+            #        thread_event.set()
+            #        thread = threading.Thread(target=backgroundTask)
+            #        thread.start()
+            #    except Exception as error:
+            #        print("Error starting processing task")
 
             # return redirect(url_for('download_file', name=filename))
-
-            socketio.emit('list-change',json_list_of_videos())
-
+            
+            sqliteConnection.close()
+            socketio.emit('list-change', json_list_of_videos())
             #return redirect(url_for("server_url", id=str(cursor.lastrowid)))
-            return url_for("download_file",id=str(cursor.lastrowid))
+            #return url_for("download_file",id=str(cursor.lastrowid))
+            return "Upload Started", 200
 
     return app.send_static_file("index.html")
 
@@ -131,29 +132,12 @@ def root():
 def static_file(path):
     return app.send_static_file(path)
 
-
-# serve the video player page
-# @app.route("/watch")
-# def serve_player_page():
-#     return app.send_static_file("player.html")
-
-
 # serve the videos
 # is this one being used?
 @app.route("/uploads/<id>")
 def download_file(id):
-    #sqliteConnection = sqlite3.connect("sql.db")
-    #cursor = sqliteConnection.cursor()
-    # https://stackoverflow.com/questions/16856647/sqlite3-programmingerror-incorrect-number-of-bindings-supplied-the-current-sta
-    # id input MUST be cast to tuple otherwise sql treats each digit as a seperate binding
-    #cursor.execute("SELECT filename FROM files WHERE id = ?", [id])
-    #result = cursor.fetchone()
-    extension = get_extension(id)
+    return send_from_directory(app.config["UPLOAD_FOLDER"], str(id) + get_extension(id))
 
-    if extension != "":
-        return send_from_directory(app.config["UPLOAD_FOLDER"], id + extension)
-    else:
-        return "not found", 404
 
 @app.route("/delete/<id>", methods=["DELETE"])
 def delete_file(id):
@@ -169,10 +153,11 @@ def delete_file(id):
             except:
                 pass
         
-        sqliteConnection = sqlite3.connect("sql.db")
+        sqliteConnection = sqlite3.connect(SQL_PATH)
         cursor = sqliteConnection.cursor()
         cursor.execute("DELETE FROM files WHERE id = ?", [id])
         sqliteConnection.commit()
+        sqliteConnection.close()
 
         socketio.emit('list-change',json_list_of_videos())
 
@@ -231,10 +216,11 @@ def download_file_thumb(id):
 @app.route("/list")
 def json_list_of_videos():
 
-    sqliteConnection = sqlite3.connect("sql.db")
+    sqliteConnection = sqlite3.connect(SQL_PATH)
     cursor = sqliteConnection.cursor()
     cursor.execute("SELECT * FROM files")
     entries = cursor.fetchall()
+    sqliteConnection.close()
 
     # Convert entries to a list of dictionaries
     entry_list = []
@@ -249,11 +235,24 @@ def json_list_of_videos():
 # https://tiagohorta1995.medium.com/python-flask-api-background-task-96bf1120a855
 thread_event = threading.Event()
 
+#def convert_video_task(current_path, final_path, video_id):
+#    autoconvert_video(current_path, final_path)
+#    generate_stt_task(final_path, video_id)
+
+def generate_stt_task(video_path, video_id):
+
+    STTFunction.STTFunction(video_path, video_id, FFMPEG_PATH)
+    sqliteConnection = sqlite3.connect(SQL_PATH)
+    cursor = sqliteConnection.cursor()
+    cursor.execute("UPDATE files SET processed = 1 WHERE id = ?",[video_id])
+    sqliteConnection.commit()
+    sqliteConnection.close()
+    socketio.emit('list-change', json_list_of_videos())
 
 def backgroundTask():
     while (True):
         # find all entries in db not processed
-        sqliteConnection = sqlite3.connect("sql.db")
+        sqliteConnection = sqlite3.connect(SQL_PATH)
         cursor = sqliteConnection.cursor()
         cursor.execute("SELECT * FROM files WHERE processed = 0")
         entries = cursor.fetchall()
@@ -275,6 +274,7 @@ def backgroundTask():
             #set processed to true
             cursor.execute("UPDATE files SET processed = 1 WHERE id = ?",[entry[0]])
             sqliteConnection.commit()
+            sqliteConnection.close()
 
             socketio.emit('list-change',json_list_of_videos())
 

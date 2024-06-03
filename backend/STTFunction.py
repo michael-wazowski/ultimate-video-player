@@ -1,6 +1,9 @@
 import whisper
+import torchaudio
+import os
 from whisper.utils import get_writer
 from datetime import datetime
+
 
 class Caption:
     def __init__(self, start, end, text, ip, reason):
@@ -51,12 +54,19 @@ Keyword_Data_Set = [
 
 
 
-def STTFunction(path, id):
+def STTFunction(path, id, ffmpeg_path=""):
 
     print("Opening: "+str(id)+", "+str(path))
+    # Move to the dir with ffmpeg to avoid whisper breaking if its not on the path
+    initial_path = os.getcwd()
+    if(not ffmpeg_path == ""):
+        os.chdir(ffmpeg_path.replace("ffmpeg.exe", ""))
 
     model = whisper.load_model("base")
     result = model.transcribe(path)
+
+    # go back to initial directory
+    os.chdir(initial_path)
     #writer = get_writer("vtt", "static/video/")
     #writer(result, str(id) + ".vtt")
     #print(f' The text in video: \n {result["text"]}')

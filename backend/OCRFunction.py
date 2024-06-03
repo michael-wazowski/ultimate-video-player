@@ -3,6 +3,7 @@ import cv2
 from datetime import datetime
 import threading
 import string
+from difflib import SequenceMatcher
 
 pytesseract.pytesseract.tesseract_cmd = r"BackendEnv\tesseract\tesseract.exe"
 
@@ -26,6 +27,11 @@ def process_frame(frame, index, results):
 
     #store the cleaned up string into the array of results
     results[index] = imgchar
+ 
+# Utility function to compute similarity between strings
+def similarity(str1, str2):
+    return SequenceMatcher(None, str1, str2).ratio()
+ 
 
 def OCRFunction(filePath, id):
 
@@ -41,7 +47,7 @@ def OCRFunction(filePath, id):
         raise IOError("Cannot open video")
 
     #track which frame of video we are on
-    counter= 0
+    counter = 0
 
     #array to store the lines of text into
     results = [""]
@@ -51,18 +57,18 @@ def OCRFunction(filePath, id):
 
     while True:
         #get a frame of video
-        ret,frame=cap.read()
+        ret,frame = cap.read()
         
         counter +=1
 
         # process the text for 1 in every 30 frames (i.e 1 per second)
-        if ((counter%30)==0): 
+        if ((counter%30) == 0): 
 
             #Make a space in the results array
             results.append("")
 
             #Process the frame in a new thread
-            thread = threading.Thread(target=process_frame, args=(frame, int(counter/30), results))
+            thread = threading.Thread(target = process_frame, args = (frame, int(counter/30), results))
             threads.append(thread)
             thread.start()
             
@@ -80,18 +86,22 @@ def OCRFunction(filePath, id):
     
     filtered_results = []
     prev_index = 0
-
     # For each line of text
     for i, imgchar in enumerate(results):
         if i > 1:
             #check if the current text is different from the previous text (ignores capitalisation, spaces, and line breaks changing)
             if imgchar.lower().replace('\n','').replace(' ','') != results[i-1].lower().replace('\n','').replace(' ',''):
                 #current line is different, so previous line is the end of some text on screen
-                #add the previous line to results (with where it started from, to where it ended)
-                filtered_results.append([results[i-1], prev_index, i])
+                
+                #checks similarity is less than 40%
 
-                #since text has changed, we are at the start of a new block. Keep track of the new blocks start in prev_index
-                prev_index = i
+                if similarity(results[i],results[i-1])<=0.4:
+
+                    filtered_results.append([results[i-1], prev_index, i])
+
+                    #add the previous line to results (with where it started from, to where it ended)
+                    #since text has changed, we are at the start of a new block. Keep track of the new blocks start in prev_index
+                    prev_index = i
 
     #for each of the unique lines of text
     for result in filtered_results:
@@ -108,6 +118,15 @@ def OCRFunction(filePath, id):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
+    '''
     inputPath = """static/video/2.mp4"""
     print("Running OCR Function")
     OCRFunction(inputPath,1)
+    print("Your video has been converted to text")
+    '''
+    
+    inputPath = "C:\\Users\\Cheyu\\Documents\\Compx241\\Project\\borrowed_223.mp4"
+    print("Running OCR Function")
+    OCRFunction(inputPath,1)
+    print("Your video has been converted to text")
+    

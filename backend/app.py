@@ -195,7 +195,7 @@ def generate_stt_task(video_path, video_id):
     STTFunction.STTFunction(video_path, video_id, FFMPEG_PATH)
 
     #These tasks eat up 100% cpu already, no point running in parallel (also if one finished the video state would be set to processed when the other wasn't finished)
-    OCRFunction.OCRFunction(video_path, id)
+    OCRFunction.OCRFunction(video_path, video_id)
 
     sqliteConnection = sqlite3.connect(SQL_PATH)
     cursor = sqliteConnection.cursor()

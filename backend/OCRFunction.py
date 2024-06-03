@@ -40,11 +40,12 @@ def OCRFunction(filePath, id):
     #Open the video with the given file path
     cap =cv2.VideoCapture(filePath)
 
-    #fps = cap.get(cv2.CAP_PROP_FPS)
-
     #Raise issue if we were not able to open the video
     if not cap.isOpened():
         raise IOError("Cannot open video")
+    
+    fps = round(cap.get(cv2.CAP_PROP_FPS))
+    print("FPS: "+str(fps))
 
     #track which frame of video we are on
     counter = 0
@@ -62,13 +63,13 @@ def OCRFunction(filePath, id):
         counter +=1
 
         # process the text for 1 in every 30 frames (i.e 1 per second)
-        if ((counter%30) == 0): 
+        if ((counter%fps) == 0): 
 
             #Make a space in the results array
             results.append("")
 
             #Process the frame in a new thread
-            thread = threading.Thread(target = process_frame, args = (frame, int(counter/30), results))
+            thread = threading.Thread(target = process_frame, args = (frame, int(counter/fps), results))
             threads.append(thread)
             thread.start()
             

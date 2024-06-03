@@ -107,9 +107,8 @@
 
 	function onNewOCR(event){
 		let cueText = event?.target?.track?.activeCues[0]?.text;
-		if(cueText){
-			customOCRText = cueText;
-		}
+		customOCRText = cueText;
+
 	}
 
 	// Detect fullscreen changing externall6y from our functions.
@@ -316,7 +315,7 @@
 	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
 		<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration} currentCueStartTime={currentCueStartTime}/>
 	</div>
-	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; margin-top: 1rem; border-radius: 8px">
+	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; margin-top: 1rem; border-radius: 8px; overflow-y: scroll">
 		<pre>{customOCRText}</pre>
 	</div>
 </div>
@@ -336,8 +335,9 @@
 
 	.controls {
 		position: absolute;
-		bottom: 0.5rem;
+		bottom: 0px;
 		width: 100%;
+		background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
 	}
 
 	.info {

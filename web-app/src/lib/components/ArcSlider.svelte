@@ -348,9 +348,9 @@
 	{/each}
 </div>
 
-<button on:click={handleClick} style="transform-origin: 0 0">
+<!-- <button on:click={handleClick} style="transform-origin: 0 0">
 	test button changes timescale
-</button>
+</button> -->
 
 <style>
 	* {

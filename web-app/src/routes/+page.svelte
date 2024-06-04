@@ -83,7 +83,6 @@
 				
 				//dynamicVideo = absoluteUrl;
 				//videoShowing.set(true);
-				console.log("JHfeufb");
 			}
 			else{
 				showUploadError();

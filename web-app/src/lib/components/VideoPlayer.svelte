@@ -239,7 +239,7 @@
 <svelte:window on:keydown={onKeypress}/>
 <div style="width: 100%; display: flex;">
 <div class="default-video">
-	<div role="presentation" bind:this={videoWrapper} bind:clientHeight={videoHeight} on:fullscreenchange={onFullscreenChange} on:focus={(e) => {}} on:mouseenter={onVideoHovered}> 
+	<div role="presentation" bind:this={videoWrapper} bind:clientHeight={videoHeight} on:fullscreenchange={onFullscreenChange} on:focus={(e) => {}} on:mouseenter={onVideoHovered} style="display: inline-block;"> 
 		<video
 		poster={thumbNailSource}
 		src={fileSource}
@@ -258,7 +258,6 @@
 		<track kind="metadata" id="ocrTrack" default src={ocrSource} on:load={grabAllOCR} on:cuechange={onNewOCR}/>
 		<track kind="metadata" id="captionTrack" default src={subSource} on:cuechange={onNewCue} on:load={grabAllCaptions}/>
 
-	
 		</video>
 	
 	
@@ -269,39 +268,41 @@
 
 
 			{#if (duration && (controlsHovered || paused || videoHovered))}
-			<TimeSlider bind:currentTimeSeconds={$time} duration={duration} onDragStart={(e) => {videoElement.pause();}}/>
+			<div transition:fade style="background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0)); border-radius: inherit;">
+				<TimeSlider bind:currentTimeSeconds={$time} duration={duration} onDragStart={(e) => {videoElement.pause();}}/>
 
-			<div class="info" transition:fade>
-				<div>
+				<div class="info">
 					<div>
-						<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
-							<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video" style="vertical-align: middle;"/>
-						</button>
+						<div>
+							<button on:click={togglePlayback} style="background-color: transparent; border-style: none;">
+								<img src="{paused ? PlayIcon : PauseIcon}" alt="Click to {paused ? "play" : "pause"} the video" style="vertical-align: middle;"/>
+							</button>
+						</div>
+		
+						<div class="text">{formatToMins($time)}/{formatToMins(duration)}</div>
 					</div>
-	
-					<div class="text">{formatToMins($time)}/{formatToMins(duration)}</div>
-				</div>
-				
-				<div >
-					<div>
-						<button on:click={switchPlaybackRate} style="background-color: transparent; border-style: none;" class="text">
-							{playbackRate}x
-						</button>
-					</div>
-					<div>
-						<button on:click={switchCaptions} style="background-color: transparent; border-style: none;">
-							<img src="{captionsState == "off" ? CaptionsIcon : CaptionsActiveIcon}" alt="Click to activate captions" style="vertical-align: middle;"/>
-						</button>
-					</div>
-					<div>
-						<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
-							<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode" style="vertical-align: middle;"/>
-						</button>
-					</div>
+					
+					<div >
+						<div>
+							<button on:click={switchPlaybackRate} style="background-color: transparent; border-style: none;" class="text">
+								{playbackRate}x
+							</button>
+						</div>
+						<div>
+							<button on:click={switchCaptions} style="background-color: transparent; border-style: none;">
+								<img src="{captionsState == "off" ? CaptionsIcon : CaptionsActiveIcon}" alt="Click to activate captions" style="vertical-align: middle;"/>
+							</button>
+						</div>
+						<div>
+							<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
+								<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode" style="vertical-align: middle;"/>
+							</button>
+						</div>
 				</div>
 
 			</div>
-
+			</div>
+		
 			{/if}
 		</div>
 	</div>
@@ -311,11 +312,11 @@
 </div>
 
 {#if captionsState == "side"}
-<div style="width: 25%;">
-	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
+<div style="width: 25%;" transition:fade>
+	<div style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
 		<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration} currentCueStartTime={currentCueStartTime}/>
 	</div>
-	<div transition:fade style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; margin-top: 1rem; border-radius: 8px; overflow-y: scroll">
+	<div style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; margin-top: 1rem; border-radius: 8px; overflow-y: scroll">
 		<pre>{customOCRText}</pre>
 	</div>
 </div>
@@ -337,7 +338,7 @@
 		position: absolute;
 		bottom: 0px;
 		width: 100%;
-		background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+		border-radius: 10px;
 	}
 
 	.info {
@@ -374,6 +375,7 @@
 		width: fit-content;
 		font-size: xx-large;
 		border-radius: 8px;
+		margin-bottom: 1%;
 	}	
 
 	.default-video {
@@ -406,7 +408,7 @@
 
 	video {
 		width: 100%;
-		vertical-align: center;
-  text-align: center;
+		border-radius: 10px 10px 10px 10px;
+		display: block;
 	}
 </style>

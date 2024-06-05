@@ -264,7 +264,7 @@
 
 </script>
 <svelte:window on:keydown={onKeypress}/>
-<div style="width: 100%; display: flex;">
+<div style="width: 100%; display: flex; align-content: flex-start;">
 <div class="default-video">
 	<div role="presentation" bind:this={videoWrapper} bind:clientHeight={videoHeight} on:fullscreenchange={onFullscreenChange} on:focus={(e) => {}} on:mouseenter={onVideoHovered} style="display: inline-block;"> 
 		<video
@@ -344,7 +344,7 @@
 </div>
 
 {#if captionsState === "side" || ocrState === "side"}
-<div style="width: 25%; height: {videoHeight}px; display: flex; flex-direction: column; gap: 10px;" transition:fade>
+<div style="width: 25%; height: {videoHeight}px; display: flex; flex-direction: column; gap: 10px; justify-self: left;" transition:fade>
 		{#if captionsState === "side"}
 			<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} currentCueStartTime={currentCueStartTime}/>
 		{/if}
@@ -411,7 +411,7 @@
 	}	
 
 	.default-video {
-		width: 70%;
+		width: initial;
 		margin-left: auto;
 		margin-right: auto;
 		margin-bottom: 0px;

@@ -96,13 +96,13 @@
     }
 
 	#search-field {
-		width: 100%;
 		font-size: 1rem;
 		border: 1px solid gray;
 		border-radius: 5px;
 		padding: 8px;
 
-        width: 80%;
+        color: #161616; 
+        width: auto;
         margin-bottom: 10px;
 	}
 

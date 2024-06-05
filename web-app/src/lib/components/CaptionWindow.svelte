@@ -3,6 +3,8 @@
     export let currentTimeSeconds;
     export let currentCueStartTime; // Binding to the cue currently shown by the video player
 
+    let filteredCaptions = captions;
+
     let container;
     let wait = false;
 
@@ -32,7 +34,7 @@
 	// resets language menu if search input is used
 	
 	const searchCues = () => {	
-		return captions = captions.filter(cue => {
+		return filteredCaptions = captions.filter(cue => {
 			let cueText = cue.content.toLowerCase();
 			return cueText.includes(searchTerm.toLowerCase())
 		});
@@ -48,7 +50,7 @@
                      bind:value={searchTerm}
                      on:input|stopPropagation={searchCues} />
     </div> 
-{#each captions as cue, i}
+{#each filteredCaptions as cue, i}
 <a href="" on:click={() => { currentTimeSeconds = cue.start}}><span id="{cue.start}" class="inactive-cue" style="{(currentTimeSeconds >= cue.start && currentTimeSeconds < cue.end) ? "color: #f4f4f4" : "text-decoration: none;"}">{cue.content} </span></a>
 {/each}
 </div>

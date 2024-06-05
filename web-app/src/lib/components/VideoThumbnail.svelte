@@ -31,7 +31,7 @@
     <video style="display: none;" src="{metadataSource}" preload="metadata" bind:duration crossorigin="anonymous">
         <track kind="captions"/>
     </video>
-    <Grid rows="1fr auto">
+    <Grid rows="1fr 2rem">
         <div style="width: 100%; height: 100%">
             <p>{lengthMinutes}</p>
             <button on:click|stopPropagation={deleteHandler} class="delete-button">
@@ -59,6 +59,8 @@
         border-color: transparent;
         border-radius: 15px;
         margin: 10px 5px 0px 5px;
+        height: 220px;
+        width: 300px;
     }
 
     div {
@@ -108,8 +110,12 @@
         margin: 8px 15px 0px 15px;
         color: #f4f4f4;
         overflow-wrap: break-word;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
         min-width: 0;
         text-align: start;
+        font-size: 10pt;
     }
 
     .thumbnail-button div, .thumbnail-button h3 {

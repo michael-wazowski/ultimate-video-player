@@ -51,7 +51,10 @@
                      on:input|stopPropagation={searchCues} />
     </div> 
 {#each filteredCaptions as cue, i}
-<a href="" on:click={() => { currentTimeSeconds = cue.start}}><span id="{cue.start}" class="inactive-cue" style="{(currentTimeSeconds >= cue.start && currentTimeSeconds < cue.end) ? "color: #f4f4f4" : "text-decoration: none;"}">{cue.content} </span></a>
+<a href="" on:click={() => { currentTimeSeconds = cue.start}}><span id="{cue.start}" class="inactive-cue" style="{((currentTimeSeconds >= cue.start && currentTimeSeconds < cue.end) || searchTerm != "") ? "color: #f4f4f4" : "text-decoration: none;"}">{cue.content} </span></a>
+{#if searchTerm != ""}
+<br><br>
+{/if}
 {/each}
 </div>
 

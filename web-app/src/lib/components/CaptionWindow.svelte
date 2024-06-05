@@ -1,7 +1,6 @@
 <script>
     export let captions = [];
     export let currentTimeSeconds;
-    export let maxTimeSeconds = 0;
     export let currentCueStartTime; // Binding to the cue currently shown by the video player
 
     let container;

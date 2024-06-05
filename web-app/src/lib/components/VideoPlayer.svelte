@@ -9,12 +9,16 @@
 	import FullscreenExitIcon from "$lib/assets/fullscreen-exit-icon.svg";
 	import CaptionsIcon from "$lib/assets/captions-icon.svg";
 	import CaptionsActiveIcon from "$lib/assets/captions-active-icon.svg";
+	import OcrIcon from "$lib/assets/ocr-icon.svg";
+	import OcrActiveIcon from "$lib/assets/ocr-active-icon.svg";
+
 
     //import { Border, Grid } from "$lib/components"
 
 	import ArcSlider from "./ArcSlider.svelte";
 	import CaptionWindow from "./CaptionWindow.svelte";
 	import TimeSlider from "./TimeSlider.svelte";
+	import Grid from "./Grid.svelte";
 
 	let videoElement;
 	let videoWrapper;
@@ -30,6 +34,7 @@
 	let videoHoveredTimeout;
 
 	let captionsState = "off" // can be off, basic or side
+	let ocrState = "off" // can be off or side
 	let playbackRate = 1
 
 	export let fileSource = "";
@@ -46,6 +51,7 @@
 	let customSubtitleText = "";
 	let customOCRText = "";
 	let currentCueStartTime;
+	let currentOcrStartTime;
 	let videoHeight;
 
 	// Used to track time of last mouse down event
@@ -105,12 +111,6 @@
 		}
 	}
 
-	function onNewOCR(event){
-		let cueText = event?.target?.track?.activeCues[0]?.text;
-		customOCRText = cueText;
-
-	}
-
 	// Detect fullscreen changing externall6y from our functions.
 	async function onFullscreenChange(e){
 		fullscreen = !fullscreen;
@@ -158,6 +158,9 @@
 			if(captionsState == "side"){
 				captionsState = "basic";
 			}
+			if(ocrState === "side"){
+				ocrState = "off";
+			}
 		}
 	}
 
@@ -177,6 +180,17 @@
 		// Captions on the side dont really make sense in a fullscreened video so stop the suer from switching to it
 		if(fullscreen && captionsState == "side"){
 			captionsState = "off";
+		}
+	}
+
+	async function switchOcr(e){
+		switch (ocrState){
+			case("off"):
+				ocrState = "side";
+				break;
+			case("side"):
+				ocrState = "off";
+				break;
 		}
 	}
 
@@ -220,6 +234,10 @@
 		}
 	}
 
+	function onNewOcrCue(event){
+		currentOcrStartTime = event?.target?.track?.activeCues[0]?.startTime;
+	}
+
 	async function onKeypress(e){
 		switch(e.code){
 			case("Space"):
@@ -255,7 +273,7 @@
 		id="video"
 		>
 		<track kind="captions" id="dummy"/>
-		<track kind="metadata" id="ocrTrack" default src={ocrSource} on:load={grabAllOCR} on:cuechange={onNewOCR}/>
+		<track kind="metadata" id="ocrTrack" default src={ocrSource} on:load={grabAllOCR} on:cuechange={onNewOcrCue}/>
 		<track kind="metadata" id="captionTrack" default src={subSource} on:cuechange={onNewCue} on:load={grabAllCaptions}/>
 
 		</video>
@@ -294,13 +312,18 @@
 							</button>
 						</div>
 						<div>
+							<button on:click={switchOcr} style="background-color: transparent; border-style: none;">
+								<img src="{ocrState == "off" ? OcrIcon : OcrActiveIcon}" alt="Click to activate ocr" style="vertical-align: middle;"/>
+							</button>
+						</div>
+						<div>
 							<button on:click={toggleFullscreen} style="background-color: transparent; border-style: none;">
 								<img src="{fullscreen ? FullscreenExitIcon : FullscreenIcon}" alt="Click to {fullscreen ? "exit" : "enter"} fullscreen mode" style="vertical-align: middle;"/>
 							</button>
 						</div>
-				</div>
+					</div>
 
-			</div>
+				</div>
 			</div>
 		
 			{/if}
@@ -311,14 +334,20 @@
 	<ArcSlider bind:time={$time} allCaptionCues={allCaptionCues} duration={duration}/>
 </div>
 
-{#if captionsState == "side"}
-<div style="width: 25%;" transition:fade>
-	<div style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; border-radius: 8px">
-		<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} maxTimeSeconds={duration} currentCueStartTime={currentCueStartTime}/>
-	</div>
-	<div style="height: calc({videoHeight/2.07}px - 2rem); background-color: #393939; display: flexbox; padding: 1rem; margin-top: 1rem; border-radius: 8px; overflow-y: scroll">
-		<pre>{customOCRText}</pre>
-	</div>
+{#if captionsState === "side" || ocrState === "side"}
+<div style="width: 25%; height: {videoHeight}px;" transition:fade>
+	<Grid rows="1fr 1fr" style="height: {videoHeight}px; row-gap: 10px;">
+		{#if captionsState === "side"}
+		<div style=" background-color: #393939; padding: 1rem; border-radius: 8px; grid-row: 1; height: {ocrState === "side" ? videoHeight/2 : videoHeight}px;">
+			<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} currentCueStartTime={currentCueStartTime}/>
+		</div>
+		{/if}
+		{#if ocrState === "side"}
+		<div style="background-color: #393939; padding: 1rem; border-radius: 8px; grid-row: 2;  height: {captionsState === "side" ? videoHeight/2 : videoHeight}px;">
+			<CaptionWindow bind:currentTimeSeconds={$time} captions={allOCRCues} currentCueStartTime={currentOcrStartTime}/>
+		</div>
+		{/if}
+	</Grid>	
 </div>
 
 {/if}

@@ -412,6 +412,7 @@
 
 	.default-video {
 		width: initial;
+		max-width: 70%;
 		margin-left: auto;
 		margin-right: auto;
 		margin-bottom: 0px;

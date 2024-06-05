@@ -41,14 +41,14 @@
 	}
 </script>
 <div id="capt-container">
-<div id="search-input-cont">
+
     <input type="text" 
                  id="search-field" 
                  placeholder="Enter Search Term" 
                  autocomplete="off"
                  bind:value={searchTerm}
                  on:input|stopPropagation={searchCues} />
-</div> 
+
 <div bind:this={container} class="hidden-scrollbar" style="overflow-y: scroll;">
     
 {#each filteredCaptions as cue, i}
@@ -95,18 +95,15 @@
         text-decoration: none;
     }
 
-    #search-input-cont {
-		width: 80%;
-		display: flex;
-        margin-bottom: 10px;
-	}
-
 	#search-field {
 		width: 100%;
 		font-size: 1rem;
 		border: 1px solid gray;
 		border-radius: 5px;
 		padding: 8px;
+
+        width: 80%;
+        margin-bottom: 10px;
 	}
 
     #capt-container {

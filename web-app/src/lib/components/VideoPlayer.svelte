@@ -239,6 +239,12 @@
 	}
 
 	async function onKeypress(e){
+
+		const activeElement = document.activeElement;
+    		if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+        	return; // Exit the function if the keypress is within an input or textarea
+    	}
+
 		switch(e.code){
 			case("Space"):
 				togglePlayback();

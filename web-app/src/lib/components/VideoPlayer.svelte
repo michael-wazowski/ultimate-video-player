@@ -256,6 +256,9 @@
 			case("KeyF"):
 				toggleFullscreen();
 				break;
+			case("KeyR"):
+				switchOcr();
+				break;
 		}
 	}
 
@@ -341,19 +344,13 @@
 </div>
 
 {#if captionsState === "side" || ocrState === "side"}
-<div style="width: 25%; height: {videoHeight}px;" transition:fade>
-	<Grid rows="1fr 1fr" style="height: {videoHeight}px; row-gap: 10px;">
+<div style="width: 25%; height: {videoHeight}px; display: flex; flex-direction: column; gap: 10px;" transition:fade>
 		{#if captionsState === "side"}
-		<div style=" background-color: #393939; padding: 1rem; border-radius: 8px; grid-row: 1; height: {ocrState === "side" ? videoHeight/2 : videoHeight}px;">
 			<CaptionWindow bind:currentTimeSeconds={$time} captions={allCaptionCues} currentCueStartTime={currentCueStartTime}/>
-		</div>
 		{/if}
 		{#if ocrState === "side"}
-		<div style="background-color: #393939; padding: 1rem; border-radius: 8px; grid-row: 2;  height: {captionsState === "side" ? videoHeight/2 : videoHeight}px;">
 			<CaptionWindow bind:currentTimeSeconds={$time} captions={allOCRCues} currentCueStartTime={currentOcrStartTime}/>
-		</div>
 		{/if}
-	</Grid>	
 </div>
 
 {/if}
@@ -418,9 +415,7 @@
 		margin-left: auto;
 		margin-right: auto;
 		margin-bottom: 0px;
-		display: flexbox;
 
-		height: 100vh;
 		overflow-y: hidden;
 		overflow-x: hidden;
 	}

@@ -40,22 +40,24 @@
 		});
 	}
 </script>
-
-<div bind:this={container} class="hidden-scrollbar" style="width: 100%; height: 100%; overflow-y: scroll;">
-    <div id="search-input-cont">
-        <input type="text" 
-                     id="search-field" 
-                     placeholder="Enter Search Term" 
-                     autocomplete="off"
-                     bind:value={searchTerm}
-                     on:input|stopPropagation={searchCues} />
-    </div> 
+<div id="capt-container">
+<div id="search-input-cont">
+    <input type="text" 
+                 id="search-field" 
+                 placeholder="Enter Search Term" 
+                 autocomplete="off"
+                 bind:value={searchTerm}
+                 on:input|stopPropagation={searchCues} />
+</div> 
+<div bind:this={container} class="hidden-scrollbar" style="overflow-y: scroll;">
+    
 {#each filteredCaptions as cue, i}
 <a href="" on:click={() => { currentTimeSeconds = cue.start}}><span id="{cue.start}" class="inactive-cue" style="{((currentTimeSeconds >= cue.start && currentTimeSeconds < cue.end) || searchTerm != "") ? "color: #f4f4f4" : "text-decoration: none;"}">{cue.content} </span></a>
 {#if searchTerm != ""}
 <br><br>
 {/if}
 {/each}
+</div>
 </div>
 
 <style>
@@ -94,18 +96,30 @@
     }
 
     #search-input-cont {
-		width: 40%;
+		width: 80%;
 		display: flex;
-		align-items: center;
-		margin: 0 0 0 10px;
+        margin-bottom: 10px;
 	}
 
 	#search-field {
 		width: 100%;
-		font-size: 1.3rem;
+		font-size: 1rem;
 		border: 1px solid gray;
 		border-radius: 5px;
 		padding: 8px;
-		margin: 0 10px 0;
 	}
+
+    #capt-container {
+        display: flex;
+        flex-direction: column;
+        height: 10%;
+
+        background-color: #393939; 
+        padding: 1rem; 
+        border-radius: 8px;
+
+        flex-basis: 50%;
+        flex-grow: 1;
+        flex-shrink: 1;
+    }
 </style>

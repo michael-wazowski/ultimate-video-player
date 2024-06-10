@@ -110,7 +110,7 @@
 {#if $videoShowing === true }
 	<VideoPlayer fileSource={dynamicVideo}/>
 {:else}
-	<Grid rows="4rem 20rem 4rem 1fr" columns="10% 80% 10%">
+	<Grid rows="4rem 15rem 4rem 1fr" columns="10% 80% 10%">
 		<h3 style="grid-column: 2;">Please select a video file to play it back!</h3>
 
 		<Border height="100%" width="100%" style="grid-column: 2;">

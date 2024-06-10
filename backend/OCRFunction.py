@@ -5,7 +5,7 @@ import threading
 import string
 from difflib import SequenceMatcher
 
-pytesseract.pytesseract.tesseract_cmd = r"BackendEnv\tesseract\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"BackendEnv\\tesseract\\tesseract.exe"
 
 #convert seconds to hour:minute:seconds
 def format_time(seconds):

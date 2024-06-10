@@ -206,6 +206,6 @@ def generate_stt_task(video_path, video_id):
 
 # start the server
 if __name__ == "__main__":
-    #app.debug = True
+    app.debug = True
     socketio.run(app, port=8000)
     #app.run()
